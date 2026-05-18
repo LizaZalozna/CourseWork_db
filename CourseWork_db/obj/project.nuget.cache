@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "vixr+JqzwfQ=",
+  "dgSpecHash": "IK/3SKEBwRc=",
   "success": true,
   "projectFilePath": "/Users/lizazalozna/RiderProjects/CourseWork_db/CourseWork_db/CourseWork_db.csproj",
   "expectedPackageFiles": [
@@ -19,6 +19,7 @@
     "/Users/lizazalozna/.nuget/packages/avalonia.themes.simple/11.3.6/avalonia.themes.simple.11.3.6.nupkg.sha512",
     "/Users/lizazalozna/.nuget/packages/avalonia.win32/11.3.6/avalonia.win32.11.3.6.nupkg.sha512",
     "/Users/lizazalozna/.nuget/packages/avalonia.x11/11.3.6/avalonia.x11.11.3.6.nupkg.sha512",
+    "/Users/lizazalozna/.nuget/packages/bcrypt.net-next/4.2.0/bcrypt.net-next.4.2.0.nupkg.sha512",
     "/Users/lizazalozna/.nuget/packages/harfbuzzsharp/8.3.1.1/harfbuzzsharp.8.3.1.1.nupkg.sha512",
     "/Users/lizazalozna/.nuget/packages/harfbuzzsharp.nativeassets.linux/8.3.1.1/harfbuzzsharp.nativeassets.linux.8.3.1.1.nupkg.sha512",
     "/Users/lizazalozna/.nuget/packages/harfbuzzsharp.nativeassets.macos/8.3.1.1/harfbuzzsharp.nativeassets.macos.8.3.1.1.nupkg.sha512",
