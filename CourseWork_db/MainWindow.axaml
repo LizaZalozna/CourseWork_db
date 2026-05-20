@@ -2,8 +2,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d"
+        d:DesignWidth="1100" d:DesignHeight="750"
         x:Class="CourseWork_db.MainWindow"
-        Title="CourseWork_db">
-    Welcome to Avalonia!
+        Title="Залізниця — квитки"
+        Width="1100" Height="750"
+        MinWidth="900" MinHeight="620"
+        WindowStartupLocation="CenterScreen">
 </Window>
