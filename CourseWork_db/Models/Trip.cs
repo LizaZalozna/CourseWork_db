@@ -11,9 +11,9 @@ public partial class Trip
 
     public int TrainId { get; set; }
 
-    public DateTime DepartureTime { get; set; }
+    public DateOnly DepartureDate { get; set; }
 
-    public DateTime ArrivalTime { get; set; }
+    public DateOnly ArrivalDate { get; set; }
 
     public virtual Route Route { get; set; } = null!;
 

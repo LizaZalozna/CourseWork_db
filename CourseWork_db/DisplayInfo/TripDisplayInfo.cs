@@ -7,8 +7,8 @@ public class TripDisplayInfo
     public int      TripId          { get; set; }
     public string   RouteName       { get; set; } = "";
     public string   TrainName       { get; set; } = "";
-    public DateTime DepartureTime   { get; set; }
-    public DateTime ArrivalTime     { get; set; }
+    public DateOnly DepartureDate   { get; set; }
+    public DateOnly ArrivalDate     { get; set; }
     public string   FromStationName { get; set; } = "";
     public string   ToStationName   { get; set; } = "";
     public int      FromStopOrder   { get; set; }
@@ -17,5 +17,5 @@ public class TripDisplayInfo
     public int      ToStationId     { get; set; }
 
     public override string ToString() =>
-        $"{RouteName} | {TrainName} | {DepartureTime:HH:mm} | {FromStationName} → {ToStationName}";
+        $"{RouteName} | {TrainName} | {DepartureDate:dd.MM.yyyy} | {FromStationName} → {ToStationName}";
 }

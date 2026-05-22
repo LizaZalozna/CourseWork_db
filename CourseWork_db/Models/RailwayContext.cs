@@ -41,8 +41,7 @@ public partial class RailwayContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql(
-            "Host=localhost;Port=5432;Database=Railway;Username=postgres;Password=1234;Timeout=5;Command Timeout=10");
+        => optionsBuilder.UseNpgsql("Host=localhost;Database=Railway;Username=postgres;Password=1602");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -53,7 +52,7 @@ public partial class RailwayContext : DbContext
             entity.ToTable("cars");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("id");
             entity.Property(e => e.CarNumber)
                 .HasDefaultValue(0)
@@ -81,10 +80,14 @@ public partial class RailwayContext : DbContext
 
             entity.HasIndex(e => e.Name, "car_types_name_key").IsUnique();
 
+            entity.HasIndex(e => e.Name, "car_types_name_unique").IsUnique();
+
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("id");
-            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.Name)
+                .HasMaxLength(20)
+                .HasColumnName("name");
         });
 
         modelBuilder.Entity<Route>(entity =>
@@ -94,9 +97,11 @@ public partial class RailwayContext : DbContext
             entity.ToTable("routes");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("id");
-            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .HasColumnName("name");
         });
 
         modelBuilder.Entity<RouteSegment>(entity =>
@@ -106,7 +111,7 @@ public partial class RailwayContext : DbContext
             entity.ToTable("route_segments");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("id");
             entity.Property(e => e.Distance).HasColumnName("distance");
             entity.Property(e => e.FromStationId).HasColumnName("from_station_id");
@@ -136,9 +141,12 @@ public partial class RailwayContext : DbContext
             entity.ToTable("route_stations");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("id");
             entity.Property(e => e.ArrivalTime).HasColumnName("arrival_time");
+            entity.Property(e => e.DayOffset)
+                .HasDefaultValue(0)
+                .HasColumnName("day_offset");
             entity.Property(e => e.DepartureTime).HasColumnName("departure_time");
             entity.Property(e => e.RouteId).HasColumnName("route_id");
             entity.Property(e => e.StationId).HasColumnName("station_id");
@@ -162,7 +170,7 @@ public partial class RailwayContext : DbContext
             entity.ToTable("seats");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("id");
             entity.Property(e => e.CarId).HasColumnName("car_id");
             entity.Property(e => e.IsUpper).HasColumnName("is_upper");
@@ -184,11 +192,17 @@ public partial class RailwayContext : DbContext
             entity.ToTable("stations");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("id");
-            entity.Property(e => e.City).HasColumnName("city");
-            entity.Property(e => e.Country).HasColumnName("country");
-            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.City)
+                .HasMaxLength(25)
+                .HasColumnName("city");
+            entity.Property(e => e.Country)
+                .HasMaxLength(60)
+                .HasColumnName("country");
+            entity.Property(e => e.Name)
+                .HasMaxLength(25)
+                .HasColumnName("name");
         });
 
         modelBuilder.Entity<Tariff>(entity =>
@@ -198,7 +212,7 @@ public partial class RailwayContext : DbContext
             entity.ToTable("tariffs");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("id");
             entity.Property(e => e.CarTypeId).HasColumnName("car_type_id");
             entity.Property(e => e.PricePerKm).HasColumnName("price_per_km");
@@ -215,10 +229,7 @@ public partial class RailwayContext : DbContext
 
             entity.ToTable("tickets");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedOnAdd()
-                .HasColumnName("id")
-                .UseIdentityColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.FromStationId).HasColumnName("from_station_id");
             entity.Property(e => e.PassengerId).HasColumnName("passenger_id");
             entity.Property(e => e.Price).HasColumnName("price");
@@ -259,9 +270,11 @@ public partial class RailwayContext : DbContext
             entity.ToTable("trains");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("id");
-            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.Name)
+                .HasMaxLength(40)
+                .HasColumnName("name");
         });
 
         modelBuilder.Entity<Trip>(entity =>
@@ -271,14 +284,10 @@ public partial class RailwayContext : DbContext
             entity.ToTable("trips");
 
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("id");
-            entity.Property(e => e.ArrivalTime)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("arrival_time");
-            entity.Property(e => e.DepartureTime)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("departure_time");
+            entity.Property(e => e.ArrivalDate).HasColumnName("arrival_date");
+            entity.Property(e => e.DepartureDate).HasColumnName("departure_date");
             entity.Property(e => e.RouteId).HasColumnName("route_id");
             entity.Property(e => e.TrainId).HasColumnName("train_id");
 
@@ -301,16 +310,30 @@ public partial class RailwayContext : DbContext
 
             entity.HasIndex(e => e.Email, "users_email_key").IsUnique();
 
+            entity.HasIndex(e => e.Email, "users_email_unique").IsUnique();
+
             entity.HasIndex(e => e.Login, "users_login_key").IsUnique();
 
+            entity.HasIndex(e => e.Login, "users_login_unique").IsUnique();
+
             entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("id");
-            entity.Property(e => e.Email).HasColumnName("email");
-            entity.Property(e => e.Login).HasColumnName("login");
-            entity.Property(e => e.Name).HasColumnName("name");
-            entity.Property(e => e.Password).HasColumnName("password");
-            entity.Property(e => e.Surname).HasColumnName("surname");
+            entity.Property(e => e.Email)
+                .HasMaxLength(50)
+                .HasColumnName("email");
+            entity.Property(e => e.Login)
+                .HasMaxLength(20)
+                .HasColumnName("login");
+            entity.Property(e => e.Name)
+                .HasMaxLength(30)
+                .HasColumnName("name");
+            entity.Property(e => e.Password)
+                .HasMaxLength(255)
+                .HasColumnName("password");
+            entity.Property(e => e.Surname)
+                .HasMaxLength(30)
+                .HasColumnName("surname");
         });
 
         OnModelCreatingPartial(modelBuilder);

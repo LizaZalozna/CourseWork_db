@@ -25,12 +25,12 @@ public class TripService
     public async Task<(bool Ok, string Error)> AddAsync(
         int routeId,
         int trainId,
-        DateTime departure,
-        DateTime arrival,
+        DateOnly departure,
+        DateOnly arrival,
         CancellationToken ct = default)
     {
-        if (arrival <= departure)
-            return (false, "Час прибуття має бути пізніше за час відправлення");
+        if (arrival < departure)
+            return (false, "Дата прибуття має бути не раніше дати відправлення");
 
         await using var db = new RailwayContext();
 
@@ -55,8 +55,8 @@ public class TripService
         {
             RouteId       = routeId,
             TrainId       = trainId,
-            DepartureTime = departure,
-            ArrivalTime   = arrival
+            DepartureDate = departure,
+            ArrivalDate   = arrival
         };
 
         db.Trips.Add(entity);
@@ -69,12 +69,12 @@ public class TripService
         int id,
         int routeId,
         int trainId,
-        DateTime departure,
-        DateTime arrival,
+        DateOnly departure,
+        DateOnly arrival,
         CancellationToken ct = default)
     {
-        if (arrival <= departure)
-            return (false, "Час прибуття має бути пізніше за час відправлення");
+        if (arrival < departure)
+            return (false, "Дата прибуття має бути не раніше дати відправлення");
 
         await using var db = new RailwayContext();
 
@@ -86,8 +86,8 @@ public class TripService
 
         entity.RouteId       = routeId;
         entity.TrainId       = trainId;
-        entity.DepartureTime = departure;
-        entity.ArrivalTime   = arrival;
+        entity.DepartureDate = departure;
+        entity.ArrivalDate   = arrival;
 
         await db.SaveChangesAsync(ct);
 

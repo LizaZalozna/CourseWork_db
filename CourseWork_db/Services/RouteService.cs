@@ -73,6 +73,83 @@ public class RouteService
         return (true, "");
     }
 
+    public async Task<(bool Ok, string Error)> UpdateRouteFullAsync(
+        int id,
+        string name,
+        List<(int StationId, int StopOrder, int DayOffset, TimeOnly ArrivalTime, TimeOnly DepartureTime, float Distance)> stations,
+        CancellationToken ct = default)
+    {
+        name = (name ?? "").Trim();
+
+        if (string.IsNullOrWhiteSpace(name))
+            return (false, "Введіть назву маршруту");
+
+        if (stations.Count < 2)
+            return (false, "Додайте мінімум 2 станції");
+
+        await using var db = new RailwayContext();
+
+        var entity = await db.Routes
+            .FirstOrDefaultAsync(x => x.Id == id, ct);
+
+        if (entity == null)
+            return (false, "Маршрут не знайдено");
+
+        var duplicate = await db.Routes.AnyAsync(
+            r => r.Name == name && r.Id != id, ct);
+
+        if (duplicate)
+            return (false, "Такий маршрут вже існує");
+
+        entity.Name = name;
+
+        var oldStations = await db.RouteStations
+            .Where(s => s.RouteId == id).ToListAsync(ct);
+        var oldSegments = await db.RouteSegments
+            .Where(s => s.RouteId == id).ToListAsync(ct);
+
+        db.RouteStations.RemoveRange(oldStations);
+        db.RouteSegments.RemoveRange(oldSegments);
+
+        foreach (var (stationId, stopOrder, dayOffset, arrivalTime, departureTime, _) in stations)
+        {
+            db.RouteStations.Add(new RouteStation
+            {
+                RouteId = id,
+                StationId = stationId,
+                StopOrder = stopOrder,
+                DayOffset = dayOffset,
+                ArrivalTime = arrivalTime,
+                DepartureTime = departureTime
+            });
+        }
+
+        for (var i = 0; i < stations.Count - 1; i++)
+        {
+            var dist = stations[i].Distance;
+            if (dist > 0)
+            {
+                db.RouteSegments.Add(new RouteSegment
+                {
+                    RouteId = id,
+                    FromStationId = stations[i].StationId,
+                    ToStationId = stations[i + 1].StationId,
+                    Distance = dist
+                });
+            }
+        }
+
+        try
+        {
+            await db.SaveChangesAsync(ct);
+            return (true, "");
+        }
+        catch (DbUpdateException)
+        {
+            return (false, "Помилка при оновленні маршруту");
+        }
+    }
+
     public async Task<(bool Ok, string Error)> DeleteAsync(
         int id,
         CancellationToken ct = default)
@@ -140,6 +217,7 @@ public class RouteService
         int stopOrder,
         TimeOnly arrivalTime,
         TimeOnly departureTime,
+        int dayOffset = 0,
         CancellationToken ct = default)
     {
         if (stopOrder <= 0)
@@ -164,6 +242,7 @@ public class RouteService
             RouteId       = routeId,
             StationId     = stationId,
             StopOrder     = stopOrder,
+            DayOffset     = dayOffset,
             ArrivalTime   = arrivalTime,
             DepartureTime = departureTime
         });

@@ -17,6 +17,8 @@ public partial class RouteStation
 
     public TimeOnly DepartureTime { get; set; }
 
+    public int DayOffset { get; set; }
+
     public virtual Route Route { get; set; } = null!;
 
     public virtual Station Station { get; set; } = null!;

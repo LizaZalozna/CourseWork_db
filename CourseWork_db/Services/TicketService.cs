@@ -35,8 +35,8 @@ public class TicketService
             .AsNoTracking()
             .Include(t => t.Route)
             .Include(t => t.Train)
-            .Where(t => t.DepartureTime.Date == date.Date)
-            .OrderBy(t => t.DepartureTime)
+            .Where(t => t.DepartureDate == DateOnly.FromDateTime(date.Date))
+            .OrderBy(t => t.DepartureDate)
             .ToListAsync(ct);
 
         if (trips.Count == 0)
@@ -77,8 +77,8 @@ public class TicketService
                 TripId          = trip.Id,
                 RouteName       = trip.Route?.Name ?? "Невідомий",
                 TrainName       = trip.Train?.Name ?? "Невідомий",
-                DepartureTime   = trip.DepartureTime,
-                ArrivalTime     = trip.ArrivalTime,
+                DepartureDate   = trip.DepartureDate,
+                ArrivalDate     = trip.ArrivalDate,
                 FromStationName = stationFrom?.Name ?? "Невідома",
                 ToStationName   = stationTo?.Name   ?? "Невідома",
                 FromStopOrder   = fromRs.StopOrder,
@@ -410,7 +410,7 @@ public class TicketService
             TrainName       = t.Trip?.Train?.Name       ?? "Невідомий",
             FromStationName = t.FromStation?.Name       ?? "Невідома",
             ToStationName   = t.ToStation?.Name         ?? "Невідома",
-            DepartureTime   = t.Trip?.DepartureTime     ?? DateTime.MinValue,
+            DepartureDate   = t.Trip?.DepartureDate     ?? DateOnly.MinValue,
             CarTypeName     = t.Seat?.Car?.CarType?.Name ?? "Невідомий",
             SeatNumber      = t.Seat?.SeatNumber        ?? 0,
             Price           = t.Price
