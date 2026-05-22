@@ -4,5 +4,6 @@
              RequestedThemeVariant="Light">
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="avares://CourseWork_db/Themes/PinkTheme.axaml" />
     </Application.Styles>
 </Application>

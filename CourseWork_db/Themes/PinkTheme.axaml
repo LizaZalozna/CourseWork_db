@@ -1,0 +1,138 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Styles.Resources>
+        <Color x:Key="PinkBg">#FFF0F5</Color>
+        <Color x:Key="PinkSurface">#FFFFFF</Color>
+        <Color x:Key="PinkPrimary">#E91E8C</Color>
+        <Color x:Key="PinkPrimaryDark">#AD1457</Color>
+        <Color x:Key="PinkPrimaryLight">#F8BBD9</Color>
+        <Color x:Key="PinkAccent">#FF80AB</Color>
+        <Color x:Key="PinkBorder">#F48FB1</Color>
+        <Color x:Key="PinkText">#4A1942</Color>
+        <Color x:Key="PinkTextMuted">#8E5A7A</Color>
+        <Color x:Key="PinkSuccess">#66BB6A</Color>
+        <Color x:Key="PinkError">#EF5350</Color>
+
+        <SolidColorBrush x:Key="PinkBgBrush" Color="{StaticResource PinkBg}" />
+        <SolidColorBrush x:Key="PinkSurfaceBrush" Color="{StaticResource PinkSurface}" />
+        <SolidColorBrush x:Key="PinkPrimaryBrush" Color="{StaticResource PinkPrimary}" />
+        <SolidColorBrush x:Key="PinkPrimaryDarkBrush" Color="{StaticResource PinkPrimaryDark}" />
+        <SolidColorBrush x:Key="PinkPrimaryLightBrush" Color="{StaticResource PinkPrimaryLight}" />
+        <SolidColorBrush x:Key="PinkAccentBrush" Color="{StaticResource PinkAccent}" />
+        <SolidColorBrush x:Key="PinkBorderBrush" Color="{StaticResource PinkBorder}" />
+        <SolidColorBrush x:Key="PinkTextBrush" Color="{StaticResource PinkText}" />
+        <SolidColorBrush x:Key="PinkTextMutedBrush" Color="{StaticResource PinkTextMuted}" />
+        <SolidColorBrush x:Key="PinkSuccessBrush" Color="{StaticResource PinkSuccess}" />
+        <SolidColorBrush x:Key="PinkErrorBrush" Color="{StaticResource PinkError}" />
+
+        <LinearGradientBrush x:Key="PinkHeaderGradient" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Color="#FF8FAB" Offset="0" />
+            <GradientStop Color="#E91E8C" Offset="0.55" />
+            <GradientStop Color="#C2185B" Offset="1" />
+        </LinearGradientBrush>
+    </Styles.Resources>
+
+    <Style Selector="Window">
+        <Setter Property="Background" Value="{StaticResource PinkBgBrush}" />
+        <Setter Property="FontFamily" Value="Inter" />
+        <Setter Property="Foreground" Value="{StaticResource PinkTextBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource PinkTextBrush}" />
+    </Style>
+
+    <Style Selector="Border.card">
+        <Setter Property="Background" Value="{StaticResource PinkSurfaceBrush}" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="BorderBrush" Value="{StaticResource PinkPrimaryLightBrush}" />
+        <Setter Property="BorderThickness" Value="1.5" />
+        <Setter Property="Padding" Value="20" />
+        <Setter Property="BoxShadow" Value="0 4 16 0 #1A000000" />
+    </Style>
+
+    <Style Selector="Border.pink-header">
+        <Setter Property="Background" Value="{StaticResource PinkHeaderGradient}" />
+        <Setter Property="Padding" Value="24,18" />
+    </Style>
+
+    <Style Selector="Button">
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="18,10" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="{StaticResource PinkPrimaryLightBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource PinkPrimaryDarkBrush}" />
+    </Style>
+    <Style Selector="Button:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource PinkBorderBrush}" />
+    </Style>
+
+    <Style Selector="Button.primary">
+        <Setter Property="Background" Value="{StaticResource PinkPrimaryBrush}" />
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource PinkPrimaryDarkBrush}" />
+    </Style>
+
+    <Style Selector="Button.secondary">
+        <Setter Property="Background" Value="{StaticResource PinkPrimaryLightBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource PinkPrimaryDarkBrush}" />
+        <Setter Property="Padding" Value="16,9" />
+        <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+
+    <Style Selector="TextBox, ComboBox, DatePicker">
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="BorderBrush" Value="{StaticResource PinkBorderBrush}" />
+        <Setter Property="Background" Value="White" />
+    </Style>
+
+    <Style Selector="TabControl">
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <Style Selector="TabItem">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource PinkTextMutedBrush}" />
+        <Setter Property="Padding" Value="16,10" />
+    </Style>
+    <Style Selector="TabItem:selected">
+        <Setter Property="Foreground" Value="{StaticResource PinkPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="ListBox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style Selector="ListBoxItem">
+        <Setter Property="Margin" Value="0,3" />
+        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="CornerRadius" Value="10" />
+    </Style>
+    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource PinkPrimaryLightBrush}" />
+    </Style>
+    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#FFF8E1F0" />
+    </Style>
+
+    <Style Selector="TextBlock.status-ok">
+        <Setter Property="Foreground" Value="{StaticResource PinkSuccessBrush}" />
+        <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+    <Style Selector="TextBlock.status-err">
+        <Setter Property="Foreground" Value="{StaticResource PinkErrorBrush}" />
+        <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+    <Style Selector="TextBlock.muted">
+        <Setter Property="Foreground" Value="{StaticResource PinkTextMutedBrush}" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+</Styles>
