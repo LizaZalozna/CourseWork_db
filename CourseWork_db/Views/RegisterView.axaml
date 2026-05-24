@@ -1,0 +1,70 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="CourseWork_db.Views.RegisterView">
+
+  <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="*,Auto,*">
+    <Border Grid.Row="1" Grid.Column="1"
+            Classes="card"
+            Width="400"
+            MinWidth="340">
+      <StackPanel Spacing="14">
+        
+        <StackPanel Spacing="4" Margin="0,0,0,4">
+          <TextBlock Text="Реєстрація"
+                     Classes="title"
+                     HorizontalAlignment="Center"/>
+          <TextBlock Text="Створіть новий обліковий запис"
+                     Classes="muted"
+                     HorizontalAlignment="Center"/>
+        </StackPanel>
+        
+        <StackPanel Spacing="4">
+          <TextBlock Text="Логін" Classes="label"/>
+          <TextBox x:Name="RegLogin" Watermark="Придумайте логін"/>
+        </StackPanel>
+
+        <Grid ColumnDefinitions="*,12,*">
+          <StackPanel Grid.Column="0" Spacing="4">
+            <TextBlock Text="Імʼя" Classes="label"/>
+            <TextBox x:Name="RegName" Watermark="Імʼя"/>
+          </StackPanel>
+          <StackPanel Grid.Column="2" Spacing="4">
+            <TextBlock Text="Прізвище" Classes="label"/>
+            <TextBox x:Name="RegSurname" Watermark="Прізвище"/>
+          </StackPanel>
+        </Grid>
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Email" Classes="label"/>
+          <TextBox x:Name="RegEmail" Watermark="your@email.com"/>
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Пароль (мін. 6 символів)" Classes="label"/>
+          <TextBox x:Name="RegPassword" Watermark="Пароль" PasswordChar="●"/>
+        </StackPanel>
+        
+        <TextBlock x:Name="StatusText"
+                   TextWrapping="Wrap"
+                   HorizontalAlignment="Center"
+                   TextAlignment="Center"
+                   FontSize="13"
+                   IsVisible="False"/>
+        
+        <Button Content="Зареєструватися"
+                Classes="primary"
+                HorizontalAlignment="Stretch"
+                Click="OnRegisterClick"/>
+
+        <Separator/>
+
+        <Button Content="← Назад до входу"
+                Classes="secondary"
+                HorizontalAlignment="Stretch"
+                Click="OnBackClick"/>
+
+      </StackPanel>
+    </Border>
+  </Grid>
+
+</UserControl>

@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:CourseWork_db.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
@@ -9,4 +10,41 @@
         Width="1100" Height="750"
         MinWidth="900" MinHeight="620"
         WindowStartupLocation="CenterScreen">
+
+    <Grid RowDefinitions="Auto,*">
+        <Border Grid.Row="0" Classes="pink-header">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="🌸 Залізниця"
+                               FontSize="26"
+                               FontWeight="Bold"
+                               Foreground="White" />
+                    <TextBlock x:Name="HeaderSubtitle"
+                               Text="Система бронювання квитків"
+                               FontSize="13"
+                               Foreground="#FFF0F5"
+                               Opacity="0.92" />
+                </StackPanel>
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            Spacing="12"
+                            VerticalAlignment="Center">
+                    <TextBlock x:Name="UserGreeting"
+                               VerticalAlignment="Center"
+                               Foreground="White"
+                               FontWeight="SemiBold"
+                               IsVisible="False" />
+                    <Button x:Name="LogoutBtn"
+                            Content="Вийти"
+                            Classes="secondary"
+                            IsVisible="False"
+                            Click="OnLogoutClick" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ContentControl x:Name="ContentHost"
+                        Grid.Row="1"
+                        Margin="20" />
+    </Grid>
 </Window>

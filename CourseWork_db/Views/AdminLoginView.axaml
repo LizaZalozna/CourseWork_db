@@ -1,0 +1,54 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="CourseWork_db.Views.AdminLoginView">
+
+  <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="*,Auto,*">
+    <Border Grid.Row="1" Grid.Column="1"
+            Classes="card"
+            Width="400"
+            MinWidth="340">
+      <StackPanel Spacing="14">
+        
+        <StackPanel Spacing="4" Margin="0,0,0,4">
+          <TextBlock Text="Адміністратор"
+                     Classes="title"
+                     HorizontalAlignment="Center"/>
+          <TextBlock Text="Вхід до панелі керування"
+                     Classes="muted"
+                     HorizontalAlignment="Center"/>
+        </StackPanel>
+        
+        <StackPanel Spacing="4">
+          <TextBlock Text="Логін адміністратора" Classes="label"/>
+          <TextBox x:Name="AdminLoginInput" Watermark="Логін"/>
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Пароль" Classes="label"/>
+          <TextBox x:Name="AdminPasswordInput" Watermark="Пароль" PasswordChar="●"/>
+        </StackPanel>
+        
+        <TextBlock x:Name="StatusText"
+                   TextWrapping="Wrap"
+                   HorizontalAlignment="Center"
+                   TextAlignment="Center"
+                   FontSize="13"
+                   IsVisible="False"/>
+
+        <Button Content="Увійти до панелі"
+                Classes="primary"
+                HorizontalAlignment="Stretch"
+                Click="OnLoginClick"/>
+
+        <Separator/>
+
+        <Button Content="← Назад до входу"
+                Classes="secondary"
+                HorizontalAlignment="Stretch"
+                Click="OnBackClick"/>
+
+      </StackPanel>
+    </Border>
+  </Grid>
+
+</UserControl>

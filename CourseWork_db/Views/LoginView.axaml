@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="CourseWork_db.Views.LoginView">
+
+  <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="*,Auto,*">
+    <Border Grid.Row="1" Grid.Column="1"
+            Classes="card"
+            Width="400"
+            MinWidth="340">
+      <StackPanel Spacing="14">
+        
+        <StackPanel Spacing="4" Margin="0,0,0,4">
+          <TextBlock Text="Вхід"
+                     Classes="title"
+                     HorizontalAlignment="Center"/>
+          <TextBlock Text="Увійдіть до свого облікового запису"
+                     Classes="muted"
+                     HorizontalAlignment="Center"/>
+        </StackPanel>
+        
+        <StackPanel Spacing="4">
+          <TextBlock Text="Логін або email" Classes="label"/>
+          <TextBox x:Name="LoginInput" Watermark="Введіть логін або email"/>
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Пароль" Classes="label"/>
+          <TextBox x:Name="LoginPassword" Watermark="Введіть пароль" PasswordChar="●"/>
+        </StackPanel>
+        
+        <TextBlock x:Name="StatusText"
+                   TextWrapping="Wrap"
+                   HorizontalAlignment="Center"
+                   TextAlignment="Center"
+                   FontSize="13"
+                   IsVisible="False"/>
+        
+        <Button Content="Увійти"
+                Classes="primary"
+                HorizontalAlignment="Stretch"
+                Click="OnLoginClick"/>
+
+        <Separator/>
+
+        <Button Content="Створити обліковий запис"
+                Classes="secondary"
+                HorizontalAlignment="Stretch"
+                Click="OnGoRegisterClick"/>
+
+        <Button Content="Вхід для адміністратора"
+                Classes="secondary"
+                HorizontalAlignment="Stretch"
+                Click="OnGoAdminClick"/>
+
+      </StackPanel>
+    </Border>
+  </Grid>
+
+</UserControl>
