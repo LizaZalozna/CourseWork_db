@@ -18,6 +18,14 @@ public partial class AdminLoginView : UserControl
         InitializeComponent();
     }
 
+    public void ClearForm()
+    {
+        AdminLoginInput.Text = "";
+        AdminPasswordInput.Text = "";
+        StatusText.IsVisible = false;
+        StatusText.Text = "";
+    }
+
     private void OnLoginClick(object? sender, RoutedEventArgs e)
     {
         var (ok, error) = _adminAuth.Login(AdminLoginInput.Text ?? "", AdminPasswordInput.Text ?? "");

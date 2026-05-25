@@ -18,7 +18,7 @@
                  Foreground="#C2185B"
                  HorizontalAlignment="Center"/>
 
-      <ComboBox x:Name="StationCombo" PlaceholderText="Оберіть станцію"/>
+      <AutoCompleteBox x:Name="StationCombo" Watermark="Оберіть станцію" FilterMode="Contains"/>
       
       <Grid ColumnDefinitions="*,10,*">
         <StackPanel Grid.Column="0" Spacing="4">

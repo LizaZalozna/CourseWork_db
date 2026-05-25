@@ -13,6 +13,7 @@ public partial class MainWindow : Window
     private readonly LoginView _loginView = new();
     private readonly RegisterView _registerView = new();
     private readonly AdminLoginView _adminLoginView = new();
+    private readonly AdminPanelView _adminPanelView = new();
 
     private User? _currentUser;
     private bool _isAdmin;
@@ -36,6 +37,7 @@ public partial class MainWindow : Window
         _adminLoginView.BackRequested += ShowLogin;
         _adminLoginView.AdminLoggedIn += OnAdminLoggedIn;
 
+        _adminPanelView.ExitRequested += OnLogout;
     }
 
     private void ShowView(Control view)
@@ -45,15 +47,24 @@ public partial class MainWindow : Window
 
     private void ShowLogin()
     {
+        ClearAllForms();
         UserGreeting.IsVisible = false;
         LogoutBtn.IsVisible = false;
         HeaderSubtitle.Text = "Система бронювання квитків";
         ShowView(_loginView);
     }
 
-    private void ShowRegister() => ShowView(_registerView);
+    private void ShowRegister()
+    {
+        ClearAllForms();
+        ShowView(_registerView);
+    }
 
-    private void ShowAdminLogin() => ShowView(_adminLoginView);
+    private void ShowAdminLogin()
+    {
+        ClearAllForms();
+        ShowView(_adminLoginView);
+    }
 
     private async void OnUserLoggedIn(User user)
     {
@@ -93,8 +104,16 @@ public partial class MainWindow : Window
         ShowMain();
     }
 
+    private void ClearAllForms()
+    {
+        _loginView.ClearForm();
+        _registerView.ClearForm();
+        _adminLoginView.ClearForm();
+    }
+
     private void ShowMain()
     {
+        ClearAllForms();
         UserGreeting.IsVisible = true;
         LogoutBtn.IsVisible = true;
 
@@ -102,6 +121,7 @@ public partial class MainWindow : Window
         {
             UserGreeting.Text = "Адміністратор";
             HeaderSubtitle.Text = "Панель керування";
+            ShowView(_adminPanelView);
         }
         else
         {

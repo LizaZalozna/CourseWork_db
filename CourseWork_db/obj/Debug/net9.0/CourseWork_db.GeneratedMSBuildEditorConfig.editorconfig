@@ -32,6 +32,9 @@ build_property.EnableCodeStyleSeverity =
 [/Users/lizazalozna/RiderProjects/CourseWork_db/CourseWork_db/App.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
+[/Users/lizazalozna/RiderProjects/CourseWork_db/CourseWork_db/Controls/RouteStationCard.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
 [/Users/lizazalozna/RiderProjects/CourseWork_db/CourseWork_db/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
@@ -39,6 +42,9 @@ build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
 [/Users/lizazalozna/RiderProjects/CourseWork_db/CourseWork_db/Views/AdminLoginView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[/Users/lizazalozna/RiderProjects/CourseWork_db/CourseWork_db/Views/AdminPanelView.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
 [/Users/lizazalozna/RiderProjects/CourseWork_db/CourseWork_db/Views/LoginView.axaml]

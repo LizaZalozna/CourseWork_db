@@ -18,6 +18,17 @@ public partial class RegisterView : UserControl
         InitializeComponent();
     }
 
+    public void ClearForm()
+    {
+        RegLogin.Text = "";
+        RegName.Text = "";
+        RegSurname.Text = "";
+        RegEmail.Text = "";
+        RegPassword.Text = "";
+        StatusText.IsVisible = false;
+        StatusText.Text = "";
+    }
+
     private async void OnRegisterClick(object? sender, RoutedEventArgs e)
     {
         var (ok, error) = await _auth.RegisterAsync(

@@ -1,0 +1,411 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="CourseWork_db.Views.AdminPanelView">
+
+  <DockPanel Margin="16">
+    <TabControl x:Name="Tabs">
+      
+      <TabItem Header="Станції">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="12"
+                      MaxWidth="560"
+                      Margin="0,12,0,80">
+
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Станція"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+                
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Існуюча станція" Classes="label"/>
+                  <AutoCompleteBox x:Name="ExistingStationBox" Watermark="Оберіть для редагування…" FilterMode="Contains"/>
+                </StackPanel>
+
+                <Separator/>
+                
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Назва" Classes="label"/>
+                  <TextBox x:Name="StationNameBox" Watermark="Назва станції"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Місто" Classes="label"/>
+                  <TextBox x:Name="StationCityBox" Watermark="Місто"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Країна" Classes="label"/>
+                  <TextBox x:Name="StationCountryBox" Watermark="Країна"/>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal"
+                            Spacing="20"
+                            HorizontalAlignment="Center">
+                  <Button x:Name="AddStationButton"
+                          Content="Додати" Classes="primary" Width="120"/>
+                  <Button x:Name="UpdateStationButton"
+                          Content="Оновити" Classes="secondary" Width="120"/>
+                  <Button x:Name="DeleteStationButton"
+                          Content="Видалити" Classes="danger" Width="120"/>
+                </StackPanel>
+
+                <TextBlock x:Name="StationMsg"
+                           TextWrapping="Wrap"
+                           IsVisible="False"
+                           TextAlignment="Center"
+                           FontSize="13"/>
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+      
+      <TabItem Header="Маршрути">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="12"
+                      MaxWidth="560"
+                      Margin="0,12,0,80">
+            
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Новий маршрут"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Назва маршруту" Classes="label"/>
+                  <TextBox x:Name="RouteNameBox" Watermark="Наприклад: Київ — Львів"/>
+                </StackPanel>
+                <Grid ColumnDefinitions="*,8,*">
+                  <Button x:Name="SaveRouteBtn"
+                          Content="✓ Зберегти маршрут" Classes="primary" Width="120"/>
+                  <Button Grid.Column="2" x:Name="ClearRouteBtn"
+                          Content="Очистити" Classes="secondary" Width="120"/>
+                </Grid>
+              </StackPanel>
+            </Border>
+            
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Зупинки маршруту"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+                
+                <Grid ColumnDefinitions="*,8,*,8,Auto,8,Auto">
+                  <Button Grid.Column="0" x:Name="AddStationCardBtn"
+                          Content="+ Станція" Classes="secondary"/>
+                  <Button Grid.Column="2" x:Name="RemoveStationCardBtn"
+                          Content="− Видалити" Classes="secondary"/>
+                  <Button Grid.Column="4" x:Name="MoveUpBtn"
+                          Content="↑" Classes="secondary" Width="48"/>
+                  <Button Grid.Column="6" x:Name="MoveDownBtn"
+                          Content="↓" Classes="secondary" Width="48"/>
+                </Grid>
+                
+                <StackPanel x:Name="RouteStationsCardsPanel" Spacing="6"/>
+                
+                <Border Classes="card-info" Padding="12,10">
+                  <StackPanel Orientation="Horizontal" Spacing="24" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                      <TextBlock Text="Відстань:" Classes="label" VerticalAlignment="Center"/>
+                      <TextBlock x:Name="TotalDistanceText" Text="0 км"
+                                 FontWeight="SemiBold" Foreground="#C2185B"
+                                 VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                      <TextBlock Text="Тривалість:" Classes="label" VerticalAlignment="Center"/>
+                      <TextBlock x:Name="TotalDurationText" Text="0 год 0 хв"
+                                 FontWeight="SemiBold" Foreground="#C2185B"
+                                 VerticalAlignment="Center"/>
+                    </StackPanel>
+                  </StackPanel>
+                </Border>
+
+                <TextBlock x:Name="RouteDetailMsg"
+                           TextWrapping="Wrap"
+                           IsVisible="False"
+                           TextAlignment="Center"
+                           FontSize="13"/>
+              </StackPanel>
+            </Border>
+            
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Існуючі маршрути"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Маршрут" Classes="label"/>
+                  <AutoCompleteBox x:Name="ExistingRouteBox" Watermark="Оберіть маршрут…" FilterMode="Contains"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal"
+                            Spacing="20"
+                            HorizontalAlignment="Center">
+                  <Button x:Name="LoadRouteButton"
+                          Content="Завантажити" Classes="secondary" Width="120"/>
+                  <Button x:Name="UpdateRouteButton"
+                          Content="Оновити" Classes="secondary" Width="120"/>
+                  <Button x:Name="DeleteRouteButton"
+                          Content="Видалити" Classes="danger" Width="120"/>
+                </StackPanel>
+                <TextBlock x:Name="RouteMsg"
+                           TextWrapping="Wrap"
+                           IsVisible="False"
+                           TextAlignment="Center"
+                           FontSize="13"/>
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="Поїзди">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="12"
+                      MaxWidth="560"
+                      Margin="0,12,0,80">
+
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Поїзд"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Існуючий поїзд" Classes="label"/>
+                  <AutoCompleteBox x:Name="ExistingTrainBox" Watermark="Оберіть для редагування…" FilterMode="Contains"/>
+                </StackPanel>
+
+                <Separator/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Назва поїзда" Classes="label"/>
+                  <TextBox x:Name="TrainNameBox" Watermark="Наприклад: Intercity 741"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            Spacing="20"
+                            HorizontalAlignment="Center">
+                  <Button x:Name="AddTrainButton"
+                          Content="Додати" Classes="primary" Width="120"/>
+                  <Button x:Name="UpdateTrainButton"
+                          Content="Оновити" Classes="secondary" Width="120"/>
+                  <Button  x:Name="DeleteTrainButton"
+                          Content="Видалити" Classes="danger" Width="120"/>
+                </StackPanel>
+
+                <TextBlock x:Name="TrainMsg"
+                           TextWrapping="Wrap"
+                           IsVisible="False"
+                           TextAlignment="Center"
+                           FontSize="13"/>
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+      
+      <TabItem Header="Вагони">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="12"
+                      MaxWidth="560"
+                      Margin="0,12,0,80">
+            
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Тип вагона"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Існуючий тип" Classes="label"/>
+                  <AutoCompleteBox x:Name="ExistingCarTypeBox" Watermark="Оберіть для редагування…" FilterMode="Contains"/>
+                </StackPanel>
+
+                <Separator/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Назва типу" Classes="label"/>
+                  <TextBox x:Name="CarTypeNameBox" Watermark="Наприклад: Купе, Плацкарт"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            Spacing="20"
+                            HorizontalAlignment="Center">
+                  <Button x:Name="AddCarTypeButton"
+                          Content="Додати" Classes="primary" Width="120"/>
+                  <Button x:Name="UpdateCarTypeButton"
+                          Content="Оновити" Classes="secondary" Width="120"/>
+                  <Button x:Name="DeleteCarTypeButton"
+                          Content="Видалити" Classes="danger" Width="120"/>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+            
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Вагон"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Існуючий вагон" Classes="label"/>
+                  <AutoCompleteBox x:Name="ExistingCarBox" Watermark="Оберіть для редагування…" FilterMode="Contains"/>
+                </StackPanel>
+
+                <Separator/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Поїзд" Classes="label"/>
+                  <AutoCompleteBox x:Name="CarTrainBox" Watermark="Оберіть поїзд" FilterMode="Contains"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Тип вагона" Classes="label"/>
+                  <AutoCompleteBox x:Name="CarTypeBox" Watermark="Оберіть тип вагона" FilterMode="Contains"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Кількість місць" Classes="label"/>
+                  <TextBox x:Name="SeatsCountBox" Watermark="Наприклад: 54"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            Spacing="20"
+                            HorizontalAlignment="Center">
+                  <Button x:Name="AddCarButton"
+                          Content="Додати" Classes="primary" Width="120"/>
+                  <Button  x:Name="UpdateCarButton"
+                          Content="Оновити" Classes="secondary" Width="120"/>
+                  <Button x:Name="DeleteCarButton"
+                          Content="Видалити" Classes="danger" Width="120"/>
+                </StackPanel>
+
+                <TextBlock x:Name="CarMsg"
+                           TextWrapping="Wrap"
+                           IsVisible="False"
+                           TextAlignment="Center"
+                           FontSize="13"/>
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+      
+      <TabItem Header="Рейси">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="12"
+                      MaxWidth="560"
+                      Margin="0,12,0,80">
+
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Рейс"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Існуючий рейс" Classes="label"/>
+                  <AutoCompleteBox x:Name="ExistingTripBox" Watermark="Оберіть для редагування…" FilterMode="Contains"/>
+                </StackPanel>
+
+                <Separator/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Маршрут" Classes="label"/>
+                  <AutoCompleteBox x:Name="TripRouteBox" Watermark="Оберіть маршрут" FilterMode="Contains"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Поїзд" Classes="label"/>
+                  <AutoCompleteBox x:Name="TripTrainBox" Watermark="Оберіть поїзд" FilterMode="Contains"/>
+                </StackPanel>
+
+                <Grid ColumnDefinitions="*,12,*">
+                  <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="Дата відправлення" Classes="label"/>
+                    <DatePicker x:Name="DepartureDatePicker"/>
+                  </StackPanel>
+                  <StackPanel Grid.Column="2" Spacing="4">
+                    <TextBlock Text="Дата прибуття" Classes="label"/>
+                    <DatePicker x:Name="ArrivalDatePicker"/>
+                  </StackPanel>
+                </Grid>
+
+                <StackPanel Orientation="Horizontal"
+                            Spacing="20"
+                            HorizontalAlignment="Center">
+                  <Button x:Name="AddTripButton"
+                          Content="Додати" Classes="primary" Width="120"/>
+                  <Button x:Name="UpdateTripButton"
+                          Content="Оновити" Classes="secondary" Width="120"/>
+                  <Button x:Name="DeleteTripButton"
+                          Content="Видалити" Classes="danger" Width="120"/>
+                </StackPanel>
+
+                <TextBlock x:Name="TripMsg"
+                           TextWrapping="Wrap"
+                           IsVisible="False"
+                           TextAlignment="Center"
+                           FontSize="13"/>
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+      
+      <TabItem Header="Тарифи">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="12"
+                      MaxWidth="560"
+                      Margin="0,12,0,80">
+
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Тариф"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Існуючий тариф" Classes="label"/>
+                  <AutoCompleteBox x:Name="ExistingTariffBox" Watermark="Оберіть для редагування…" FilterMode="Contains"/>
+                </StackPanel>
+
+                <Separator/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Тип вагона" Classes="label"/>
+                  <AutoCompleteBox x:Name="TariffCarTypeBox" Watermark="Оберіть тип вагона" FilterMode="Contains"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Ціна за 1 км (грн)" Classes="label"/>
+                  <TextBox x:Name="TariffPriceBox" Watermark="Наприклад: 2.50"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            Spacing="20"
+                            HorizontalAlignment="Center">
+                  <Button x:Name="AddTariffButton"
+                          Content="Додати" Classes="primary" Width="120"/>
+                  <Button  x:Name="UpdateTariffButton"
+                          Content="Оновити" Classes="secondary" Width="120"/>
+                  <Button x:Name="DeleteTariffButton"
+                          Content="Видалити" Classes="danger" Width="120"/>
+                </StackPanel>
+
+                <TextBlock x:Name="TariffMsg"
+                           TextWrapping="Wrap"
+                           IsVisible="False"
+                           TextAlignment="Center"
+                           FontSize="13"/>
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+    </TabControl>
+  </DockPanel>
+
+</UserControl>

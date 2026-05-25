@@ -20,6 +20,14 @@ public partial class LoginView : UserControl
         InitializeComponent();
     }
 
+    public void ClearForm()
+    {
+        LoginInput.Text = "";
+        LoginPassword.Text = "";
+        StatusText.IsVisible = false;
+        StatusText.Text = "";
+    }
+
     private async void OnLoginClick(object? sender, RoutedEventArgs e)
     {
         var (ok, error, user) = await _auth.LoginAsync(LoginInput.Text ?? "", LoginPassword.Text ?? "");

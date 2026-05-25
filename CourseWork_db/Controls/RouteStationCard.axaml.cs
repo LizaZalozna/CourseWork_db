@@ -52,13 +52,13 @@ public partial class RouteStationCard : UserControl
 
     private static bool IsFromInputControl(object? source)
     {
-        if (source is TextBox or ComboBox or TimePicker) return true;
+        if (source is TextBox or ComboBox or TimePicker or AutoCompleteBox) return true;
 
         if (source is Visual visual)
         {
             foreach (var parent in visual.GetVisualAncestors())
             {
-                if (parent is TextBox or ComboBox or TimePicker) return true;
+                if (parent is TextBox or ComboBox or TimePicker or AutoCompleteBox) return true;
             }
         }
 
@@ -70,7 +70,6 @@ public partial class RouteStationCard : UserControl
         var currentId = StationId;
         var options = stations.Select(s => new StationOption(s)).ToList();
         StationCombo.ItemsSource = options;
-        StationCombo.ItemTemplate = null;
 
         if (currentId is null) return;
 
