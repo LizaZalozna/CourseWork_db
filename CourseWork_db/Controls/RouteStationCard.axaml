@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="CourseWork_db.Controls.RouteStationCard"
+             MinWidth="280">
+
+  <Border x:Name="CardBorder"
+          Background="#FFFFFF"
+          CornerRadius="12"
+          Padding="14"
+          BorderBrush="#F8BBD9"
+          BorderThickness="2"
+          BoxShadow="0 2 10 0 #14C2185B">
+    <StackPanel Spacing="10">
+
+      <TextBlock x:Name="NumberText"
+                 FontWeight="Bold"
+                 FontSize="13"
+                 Foreground="#C2185B"
+                 HorizontalAlignment="Center"/>
+
+      <ComboBox x:Name="StationCombo" PlaceholderText="Оберіть станцію"/>
+      
+      <Grid ColumnDefinitions="*,10,*">
+        <StackPanel Grid.Column="0" Spacing="4">
+          <TextBlock Text="Прибуття" Classes="label"/>
+          <TimePicker x:Name="ArrivalTimePicker"/>
+        </StackPanel>
+        <StackPanel Grid.Column="2" Spacing="4">
+          <TextBlock Text="Відправлення" Classes="label"/>
+          <TimePicker x:Name="DepartureTimePicker"/>
+        </StackPanel>
+      </Grid>
+
+      <Grid ColumnDefinitions="80,10,*">
+        <StackPanel Grid.Column="0" Spacing="4">
+          <TextBlock Text="День" Classes="label"/>
+          <TextBox x:Name="DayOffsetBox" Watermark="0"/>
+        </StackPanel>
+        <StackPanel Grid.Column="2" Spacing="4">
+          <TextBlock Text="Відстань до наступної (км)" Classes="label"/>
+          <TextBox x:Name="DistanceBox" Watermark="км"/>
+        </StackPanel>
+      </Grid>
+
+    </StackPanel>
+  </Border>
+
+</UserControl>

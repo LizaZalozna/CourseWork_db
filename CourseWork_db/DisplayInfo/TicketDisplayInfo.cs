@@ -5,10 +5,13 @@ namespace CourseWork_db.DisplayInfo;
 public class TicketDisplayInfo
 {
     public int      TicketId        { get; set; }
+    public int      TripId          { get; set; }
     public string   RouteName       { get; set; } = "";
     public string   TrainName       { get; set; } = "";
     public string   FromStationName { get; set; } = "";
     public string   ToStationName   { get; set; } = "";
+    public int      FromStationId   { get; set; }
+    public int      ToStationId     { get; set; }
     public DateOnly DepartureDate   { get; set; }
     public string   CarTypeName     { get; set; } = "";
     public int      SeatNumber      { get; set; }

@@ -406,14 +406,53 @@ public class TicketService
         return tickets.Select(t => new TicketDisplayInfo
         {
             TicketId        = t.Id,
+            TripId          = t.TripId,
             RouteName       = t.Trip?.Route?.Name       ?? "Невідомий",
             TrainName       = t.Trip?.Train?.Name       ?? "Невідомий",
             FromStationName = t.FromStation?.Name       ?? "Невідома",
             ToStationName   = t.ToStation?.Name         ?? "Невідома",
+            FromStationId   = t.FromStationId,
+            ToStationId     = t.ToStationId,
             DepartureDate   = t.Trip?.DepartureDate     ?? DateOnly.MinValue,
             CarTypeName     = t.Seat?.Car?.CarType?.Name ?? "Невідомий",
             SeatNumber      = t.Seat?.SeatNumber        ?? 0,
             Price           = t.Price
         }).ToList();
     }
+
+    public async Task<List<RouteStationDisplayInfo>> GetRouteStationsAsync(
+        int tripId,
+        int fromStationId,
+        int toStationId,
+        CancellationToken ct = default)
+    {
+        await using var db = new RailwayContext();
+
+        var trip = await db.Trips
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == tripId, ct);
+
+        if (trip == null)
+            return new List<RouteStationDisplayInfo>();
+
+        var routeStations = await db.RouteStations
+            .AsNoTracking()
+            .Include(rs => rs.Station)
+            .Where(rs => rs.RouteId == trip.RouteId)
+            .OrderBy(rs => rs.StopOrder)
+            .ToListAsync(ct);
+
+        return routeStations.Select(rs => new RouteStationDisplayInfo
+        {
+            StopOrder      = rs.StopOrder,
+            StationName    = rs.Station?.Name ?? "Невідома",
+            StationInfo    = $"{rs.Station?.City ?? ""} ({rs.Station?.Country ?? ""})",
+            ArrivalTime    = rs.ArrivalTime.ToString(),
+            DepartureTime  = rs.DepartureTime.ToString(),
+            DayOffset      = rs.DayOffset,
+            IsFromStation  = rs.StationId == fromStationId,
+            IsToStation    = rs.StationId == toStationId
+        }).ToList();
+    }
+    
 }
