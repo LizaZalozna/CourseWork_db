@@ -3,11 +3,9 @@ using System.Collections.Generic;
 
 namespace CourseWork_db.Models;
 
-public partial class RouteSegment
+public partial class Segment
 {
     public int Id { get; set; }
-
-    public int RouteId { get; set; }
 
     public int FromStationId { get; set; }
 
@@ -16,8 +14,6 @@ public partial class RouteSegment
     public float Distance { get; set; }
 
     public virtual Station FromStation { get; set; } = null!;
-
-    public virtual Route Route { get; set; } = null!;
 
     public virtual Station ToStation { get; set; } = null!;
 }

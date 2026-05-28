@@ -13,11 +13,11 @@ public partial class Station
 
     public string Country { get; set; } = null!;
 
-    public virtual ICollection<RouteSegment> RouteSegmentFromStations { get; set; } = new List<RouteSegment>();
-
-    public virtual ICollection<RouteSegment> RouteSegmentToStations { get; set; } = new List<RouteSegment>();
-
     public virtual ICollection<RouteStation> RouteStations { get; set; } = new List<RouteStation>();
+
+    public virtual ICollection<Segment> SegmentFromStations { get; set; } = new List<Segment>();
+
+    public virtual ICollection<Segment> SegmentToStations { get; set; } = new List<Segment>();
 
     public virtual ICollection<Ticket> TicketFromStations { get; set; } = new List<Ticket>();
 

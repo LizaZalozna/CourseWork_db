@@ -13,11 +13,11 @@ public partial class RouteStation
 
     public int StopOrder { get; set; }
 
-    public TimeOnly ArrivalTime { get; set; }
-
-    public TimeOnly DepartureTime { get; set; }
-
     public int DayOffset { get; set; }
+
+    public TimeOnly? ArrivalTime { get; set; }
+
+    public TimeOnly? DepartureTime { get; set; }
 
     public virtual Route Route { get; set; } = null!;
 

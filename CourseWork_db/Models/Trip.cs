@@ -17,6 +17,8 @@ public partial class Trip
 
     public virtual Route Route { get; set; } = null!;
 
+    public virtual ICollection<SeatPriorityPerTrip> SeatPriorityPerTrips { get; set; } = new List<SeatPriorityPerTrip>();
+
     public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 
     public virtual Train Train { get; set; } = null!;

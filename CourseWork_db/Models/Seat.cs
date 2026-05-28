@@ -9,13 +9,13 @@ public partial class Seat
 
     public int CarId { get; set; }
 
-    public bool? IsWindow { get; set; }
-
-    public bool? IsUpper { get; set; }
-
     public int SeatNumber { get; set; }
 
     public virtual Car Car { get; set; } = null!;
+
+    public virtual ICollection<SeatCharacteristicMap> SeatCharacteristicMaps { get; set; } = new List<SeatCharacteristicMap>();
+
+    public virtual ICollection<SeatPriorityPerTrip> SeatPriorityPerTrips { get; set; } = new List<SeatPriorityPerTrip>();
 
     public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }

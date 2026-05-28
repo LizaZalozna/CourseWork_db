@@ -7,9 +7,19 @@ public partial class CarType
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    public int CarTypeNameId { get; set; }
+
+    public int ModernizationStageId { get; set; }
+
+    public float PricePerKm { get; set; }
+
+    public float ServicePrice { get; set; }
+
+    public virtual ICollection<CarTypeAllowedCharacteristic> CarTypeAllowedCharacteristics { get; set; } = new List<CarTypeAllowedCharacteristic>();
+
+    public virtual CarTypeName CarTypeName { get; set; } = null!;
 
     public virtual ICollection<Car> Cars { get; set; } = new List<Car>();
 
-    public virtual ICollection<Tariff> Tariffs { get; set; } = new List<Tariff>();
+    public virtual ModernizationStage ModernizationStage { get; set; } = null!;
 }
