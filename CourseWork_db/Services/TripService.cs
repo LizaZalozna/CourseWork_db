@@ -40,17 +40,6 @@ public class TripService
         if (!await db.Trains.AnyAsync(t => t.Id == trainId, ct))
             return (false, "Оберіть існуючий поїзд");
 
-        var carIds = await db.Cars
-            .Where(c => c.TrainId == trainId)
-            .Select(c => c.Id)
-            .ToListAsync(ct);
-
-        if (carIds.Count == 0)
-            return (false, "У поїзда немає вагонів. Спочатку додайте вагон.");
-
-        if (!await db.Seats.AnyAsync(s => carIds.Contains(s.CarId), ct))
-            return (false, "У вагонів поїзда немає місць. Спочатку створіть місця у вагонах.");
-
         var entity = new Trip
         {
             RouteId       = routeId,

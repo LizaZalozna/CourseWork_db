@@ -56,20 +56,41 @@ public class CarService
         await db.SaveChangesAsync(ct);
 
         var seats = new List<Seat>();
-
-        for (int i = 1; i <= seatsCount; i++)
-        {
-            seats.Add(new Seat
-            {
-                CarId = car.Id,
-                SeatNumber = i,
-                IsWindow = (i % 4 == 1 || i % 4 == 0),
-                IsUpper = (i % 2 == 0)
-            });
-        }
+        for (var i = 1; i <= seatsCount; i++)
+            seats.Add(new Seat { CarId = car.Id, SeatNumber = i });
 
         db.Seats.AddRange(seats);
         await db.SaveChangesAsync(ct);
+
+        var allowedChars = await db.CarTypeAllowedCharacteristics
+            .Include(ac => ac.SeatCharacteristic)
+            .Where(ac => ac.CarTypeId == carTypeId)
+            .ToListAsync(ct);
+
+        if (allowedChars.Count > 0)
+        {
+            var byType = allowedChars
+                .GroupBy(ac => ac.SeatCharacteristic.CharacteristicTypeId)
+                .ToList();
+
+            var maps = new List<SeatCharacteristicMap>();
+            foreach (var seat in seats)
+            {
+                foreach (var group in byType)
+                {
+                    var values = group.ToList();
+                    var idx = values.Count == 1 ? 0 : (seat.SeatNumber - 1) % values.Count;
+                    maps.Add(new SeatCharacteristicMap
+                    {
+                        SeatId = seat.Id,
+                        SeatCharacteristicId = values[idx].SeatCharacteristicId
+                    });
+                }
+            }
+
+            db.SeatCharacteristicMaps.AddRange(maps);
+            await db.SaveChangesAsync(ct);
+        }
 
         return (true, "");
     }

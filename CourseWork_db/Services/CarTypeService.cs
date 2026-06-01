@@ -15,30 +15,45 @@ public class CarTypeService
 
         return await db.CarTypes
             .AsNoTracking()
+            .Include(t => t.CarTypeName)
+            .Include(t => t.ModernizationStage)
             .OrderBy(t => t.Id)
             .ToListAsync(ct);
     }
 
     public async Task<(bool Ok, string Error)> AddAsync(
-        string name,
+        int carTypeNameId,
+        int modernizationStageId,
+        float pricePerKm,
+        float servicePrice,
         CancellationToken ct = default)
     {
-        name = (name ?? "").Trim();
+        if (pricePerKm <= 0)
+            return (false, "Вартість за км має бути > 0");
 
-        if (string.IsNullOrWhiteSpace(name))
-            return (false, "Введіть назву типу вагона");
+        if (servicePrice <= 0)
+            return (false, "Вартість обслуговування має бути > 0");
 
         await using var db = new RailwayContext();
 
-        var exists = await db.CarTypes
-            .AnyAsync(x => x.Name == name, ct);
+        if (!await db.CarTypeNames.AnyAsync(x => x.Id == carTypeNameId, ct))
+            return (false, "Оберіть існуючу назву типу вагона");
 
-        if (exists)
+        if (!await db.ModernizationStages.AnyAsync(x => x.Id == modernizationStageId, ct))
+            return (false, "Оберіть існуючий етап модернізації");
+
+        var duplicate = await db.CarTypes.AnyAsync(x =>
+            x.CarTypeNameId == carTypeNameId && x.ModernizationStageId == modernizationStageId, ct);
+
+        if (duplicate)
             return (false, "Такий тип вагона вже існує");
 
         var entity = new CarType
         {
-            Name = name
+            CarTypeNameId = carTypeNameId,
+            ModernizationStageId = modernizationStageId,
+            PricePerKm = pricePerKm,
+            ServicePrice = servicePrice
         };
 
         db.CarTypes.Add(entity);
@@ -49,29 +64,35 @@ public class CarTypeService
 
     public async Task<(bool Ok, string Error)> UpdateAsync(
         int id,
-        string name,
+        int carTypeNameId,
+        int modernizationStageId,
+        float pricePerKm,
+        float servicePrice,
         CancellationToken ct = default)
     {
-        name = (name ?? "").Trim();
+        if (pricePerKm <= 0)
+            return (false, "Вартість за км має бути > 0");
 
-        if (string.IsNullOrWhiteSpace(name))
-            return (false, "Введіть назву типу вагона");
+        if (servicePrice <= 0)
+            return (false, "Вартість обслуговування має бути > 0");
 
         await using var db = new RailwayContext();
 
-        var entity = await db.CarTypes
-            .FirstOrDefaultAsync(x => x.Id == id, ct);
+        var entity = await db.CarTypes.FirstOrDefaultAsync(x => x.Id == id, ct);
 
         if (entity == null)
             return (false, "Тип вагона не знайдено");
 
-        var duplicate = await db.CarTypes
-            .AnyAsync(x => x.Name == name && x.Id != id, ct);
+        var duplicate = await db.CarTypes.AnyAsync(x =>
+            x.CarTypeNameId == carTypeNameId && x.ModernizationStageId == modernizationStageId && x.Id != id, ct);
 
         if (duplicate)
             return (false, "Такий тип вагона вже існує");
 
-        entity.Name = name;
+        entity.CarTypeNameId = carTypeNameId;
+        entity.ModernizationStageId = modernizationStageId;
+        entity.PricePerKm = pricePerKm;
+        entity.ServicePrice = servicePrice;
 
         await db.SaveChangesAsync(ct);
 

@@ -12,6 +12,7 @@ namespace CourseWork_db.Services;
 public class TicketService
 {
     private readonly PricingService _pricing = new();
+    private readonly SeatPriorityService _priorities = new();
 
     public async Task<List<Station>> GetStationsAsync(CancellationToken ct = default)
     {
@@ -78,11 +79,8 @@ public class TicketService
                 RouteName       = trip.Route?.Name ?? "Невідомий",
                 TrainName       = trip.Train?.Name ?? "Невідомий",
                 DepartureDate   = trip.DepartureDate,
-                ArrivalDate     = trip.ArrivalDate,
                 FromStationName = stationFrom?.Name ?? "Невідома",
                 ToStationName   = stationTo?.Name   ?? "Невідома",
-                FromStopOrder   = fromRs.StopOrder,
-                ToStopOrder     = toRs.StopOrder,
                 FromStationId   = fromStationId,
                 ToStationId     = toStationId
             });
@@ -123,9 +121,8 @@ public class TicketService
         if (toRs == null)
             return (new List<SeatDisplayInfo>(), $"Станція прибуття {toStationId} не є зупинкою маршруту");
 
-        var fromOrder     = fromRs.StopOrder;
-        var toOrder       = toRs.StopOrder;
-        var totalStations = routeStations.Count;
+        var fromOrder = fromRs.StopOrder;
+        var toOrder   = toRs.StopOrder;
 
         var cars = await db.Cars
             .AsNoTracking()
@@ -141,33 +138,41 @@ public class TicketService
             .AsNoTracking()
             .Include(s => s.Car)
             .ThenInclude(c => c!.CarType)
+            .ThenInclude(ct => ct!.CarTypeName)
+            .Include(s => s.SeatCharacteristicMaps)
+            .ThenInclude(scm => scm.SeatCharacteristic)
+            .ThenInclude(sc => sc.CharacteristicType)
             .Where(s => s.Car != null && carIds.Contains(s.CarId))
             .ToListAsync(ct);
 
         if (allSeats.Count == 0)
             return (new List<SeatDisplayInfo>(), "Для вагонів не створені місця");
 
-        var segments = await db.RouteSegments
-            .AsNoTracking()
-            .Where(rs => rs.RouteId == trip.RouteId)
-            .ToListAsync(ct);
-
-        var segmentOrders = segments.ToDictionary(
-            s => s.Id,
-            s => (
-                FromOrder: routeStations.FirstOrDefault(rs => rs.StationId == s.FromStationId)?.StopOrder ?? 0,
-                ToOrder:   routeStations.FirstOrDefault(rs => rs.StationId == s.ToStationId)?.StopOrder   ?? 0
-            ));
-
-        var segmentDistance = segments
-            .Where(s => segmentOrders[s.Id].FromOrder >= fromOrder && segmentOrders[s.Id].ToOrder <= toOrder)
-            .Sum(s => s.Distance);
+        var segmentDistance = await GetSegmentDistanceAsync(db, routeStations, fromOrder, toOrder, ct);
 
         var allTickets = await db.Tickets
             .AsNoTracking()
             .Where(t => t.TripId == tripId)
             .Select(t => new { t.SeatId, t.FromStationId, t.ToStationId })
             .ToListAsync(ct);
+
+        var priorities = await db.SeatPriorityPerTrips
+            .AsNoTracking()
+            .Include(sp => sp.SeatPriority)
+            .Where(sp => sp.TripId == tripId)
+            .ToListAsync(ct);
+
+        var carTypeIds = cars.Select(c => c.CarTypeId).Distinct().ToList();
+        var allowedChars = await db.CarTypeAllowedCharacteristics
+            .AsNoTracking()
+            .Include(ac => ac.SeatCharacteristic)
+            .ThenInclude(sc => sc.CharacteristicType)
+            .Where(ac => carTypeIds.Contains(ac.CarTypeId))
+            .ToListAsync(ct);
+
+        var allowedByCarType = allowedChars
+            .GroupBy(ac => ac.CarTypeId)
+            .ToDictionary(g => g.Key, g => g.Select(ac => ac.SeatCharacteristic).ToHashSet());
 
         var result = new List<SeatDisplayInfo>();
 
@@ -186,35 +191,40 @@ public class TicketService
 
             if (isOccupied) continue;
 
-            var tariff = await db.Tariffs
-                .AsNoTracking()
-                .FirstOrDefaultAsync(t => t.CarTypeId == seat.Car!.CarTypeId, ct);
+            var carType = seat.Car!.CarType;
+            var pricePerKm   = carType?.PricePerKm ?? 0f;
+            var servicePrice = carType?.ServicePrice ?? 0f;
 
-            var pricePerKm = tariff?.PricePerKm ?? 0f;
-            
-            var ticketOrders = seatTickets
-                .Select(t => (
-                    FromOrder: routeStations.FirstOrDefault(rs => rs.StationId == t.FromStationId)?.StopOrder ?? 0,
-                    ToOrder:   routeStations.FirstOrDefault(rs => rs.StationId == t.ToStationId)?.StopOrder   ?? 0
-                ))
-                .ToList();
+            var priorityName = priorities
+                .FirstOrDefault(sp => sp.SeatId == seat.Id)
+                ?.SeatPriority?.Name ?? "Низький";
+
+            var chars = seat.SeatCharacteristicMaps?
+                .Select(scm => scm.SeatCharacteristic)
+                .Where(sc => sc?.CharacteristicType != null)
+                .Where(sc =>
+                {
+                    if (carType?.Id == null) return true;
+                    return allowedByCarType.TryGetValue(carType.Id, out var allowed)
+                        && allowed.Contains(sc);
+                })
+                .Select(sc => $"{sc.CharacteristicType.Name}: {sc.Value}")
+                .ToList() ?? new();
 
             var (finalPrice, priceInfo) = _pricing.Calculate(
-                segmentDistance, pricePerKm,
-                fromOrder, toOrder, totalStations,
-                ticketOrders);
+                segmentDistance, pricePerKm, servicePrice,
+                priorityName);
 
             result.Add(new SeatDisplayInfo
             {
-                SeatId      = seat.Id,
-                SeatNumber  = seat.SeatNumber,
-                CarId       = seat.CarId,
-                CarNumber   = seat.Car?.CarNumber ?? 0,
-                CarTypeName = seat.Car?.CarType?.Name ?? "Невідомий",
-                IsWindow    = seat.IsWindow ?? false,
-                IsUpper     = seat.IsUpper  ?? false,
-                Price       = finalPrice,
-                PriceInfo   = priceInfo
+                SeatId          = seat.Id,
+                SeatNumber      = seat.SeatNumber,
+                CarNumber       = seat.Car?.CarNumber ?? 0,
+                CarTypeName     = carType?.CarTypeName?.Name ?? "Невідомий",
+                Price           = finalPrice,
+                PriceInfo       = priceInfo,
+                PriorityName    = priorityName,
+                Characteristics = string.Join(", ", chars)
             });
         }
 
@@ -258,55 +268,31 @@ public class TicketService
         if (fromRs == null || toRs == null)
             return (false, "Станції не знайдені в маршруті", 0, "");
 
-        var fromOrder     = fromRs.StopOrder;
-        var toOrder       = toRs.StopOrder;
-        var totalStations = routeStations.Count;
+        var fromOrder = fromRs.StopOrder;
+        var toOrder   = toRs.StopOrder;
 
-        var segments = await db.RouteSegments
+        var segmentDistance = await GetSegmentDistanceAsync(db, routeStations, fromOrder, toOrder, ct);
+
+        var carType      = seat.Car?.CarType;
+        var pricePerKm   = carType?.PricePerKm ?? 0f;
+        var servicePrice = carType?.ServicePrice ?? 0f;
+
+        var priorityName = await db.SeatPriorityPerTrips
             .AsNoTracking()
-            .Where(rs => rs.RouteId == trip.RouteId)
-            .ToListAsync(ct);
+            .Include(sp => sp.SeatPriority)
+            .Where(sp => sp.TripId == tripId && sp.SeatId == seatId)
+            .Select(sp => sp.SeatPriority!.Name)
+            .FirstOrDefaultAsync(ct) ?? "Низький";
 
-        var segmentOrders = segments.ToDictionary(
-            s => s.Id,
-            s => (
-                FromOrder: routeStations.FirstOrDefault(rs => rs.StationId == s.FromStationId)?.StopOrder ?? 0,
-                ToOrder:   routeStations.FirstOrDefault(rs => rs.StationId == s.ToStationId)?.StopOrder   ?? 0
-            ));
-
-        var segmentDistance = segments
-            .Where(s => segmentOrders[s.Id].FromOrder >= fromOrder && segmentOrders[s.Id].ToOrder <= toOrder)
-            .Sum(s => s.Distance);
-
-        var tariff = await db.Tariffs
-            .AsNoTracking()
-            .FirstOrDefaultAsync(t => t.CarTypeId == seat.Car!.CarTypeId, ct);
-
-        var pricePerKm = tariff?.PricePerKm ?? 0f;
-
-        var allTickets = await db.Tickets
-            .AsNoTracking()
-            .Where(t => t.TripId == tripId && t.SeatId == seatId)
-            .Select(t => new { t.FromStationId, t.ToStationId })
-            .ToListAsync(ct);
-
-        var ticketOrders = allTickets
-            .Select(t => (
-                FromOrder: routeStations.FirstOrDefault(rs => rs.StationId == t.FromStationId)?.StopOrder ?? 0,
-                ToOrder:   routeStations.FirstOrDefault(rs => rs.StationId == t.ToStationId)?.StopOrder   ?? 0
-            ))
-            .ToList();
-
-        var (finalPrice, priceInfo) = _pricing.CalculateDetailed(
-            segmentDistance, pricePerKm,
-            fromOrder, toOrder, totalStations,
-            ticketOrders);
+        var (finalPrice, priceInfo) = _pricing.Calculate(
+            segmentDistance, pricePerKm, servicePrice,
+            priorityName);
 
         return (true, "", finalPrice, priceInfo);
     }
 
     public async Task<(bool Success, string Error)> BuyTicketAsync(
-        int passengerId,
+        int userId,
         int tripId,
         int seatId,
         int fromStationId,
@@ -360,7 +346,7 @@ public class TicketService
         var entity = new Ticket
         {
             TripId        = tripId,
-            PassengerId   = passengerId,
+            UserId        = userId,
             SeatId        = seatId,
             FromStationId = fromStationId,
             ToStationId   = toStationId,
@@ -372,6 +358,7 @@ public class TicketService
         try
         {
             await db.SaveChangesAsync(ct);
+            await _priorities.AssignPrioritiesAsync(tripId, ct);
             return (true, "");
         }
         catch (DbUpdateException ex)
@@ -387,7 +374,7 @@ public class TicketService
     }
 
     public async Task<List<TicketDisplayInfo>> GetMyTicketsAsync(
-        int passengerId,
+        int userId,
         CancellationToken ct = default)
     {
         await using var db = new RailwayContext();
@@ -398,8 +385,8 @@ public class TicketService
             .Include(t => t.Trip).ThenInclude(tr => tr!.Train)
             .Include(t => t.FromStation)
             .Include(t => t.ToStation)
-            .Include(t => t.Seat).ThenInclude(s => s!.Car).ThenInclude(c => c!.CarType)
-            .Where(t => t.PassengerId == passengerId)
+            .Include(t => t.Seat).ThenInclude(s => s!.Car).ThenInclude(c => c!.CarType).ThenInclude(ct => ct!.CarTypeName)
+            .Where(t => t.UserId == userId)
             .OrderByDescending(t => t.Id)
             .ToListAsync(ct);
 
@@ -407,23 +394,21 @@ public class TicketService
         {
             TicketId        = t.Id,
             TripId          = t.TripId,
-            RouteName       = t.Trip?.Route?.Name       ?? "Невідомий",
-            TrainName       = t.Trip?.Train?.Name       ?? "Невідомий",
-            FromStationName = t.FromStation?.Name       ?? "Невідома",
-            ToStationName   = t.ToStation?.Name         ?? "Невідома",
+            RouteName       = t.Trip?.Route?.Name               ?? "Невідомий",
+            TrainName       = t.Trip?.Train?.Name               ?? "Невідомий",
+            FromStationName = t.FromStation?.Name               ?? "Невідома",
+            ToStationName   = t.ToStation?.Name                 ?? "Невідома",
             FromStationId   = t.FromStationId,
             ToStationId     = t.ToStationId,
-            DepartureDate   = t.Trip?.DepartureDate     ?? DateOnly.MinValue,
-            CarTypeName     = t.Seat?.Car?.CarType?.Name ?? "Невідомий",
-            SeatNumber      = t.Seat?.SeatNumber        ?? 0,
+            DepartureDate   = t.Trip?.DepartureDate             ?? DateOnly.MinValue,
+            CarTypeName     = t.Seat?.Car?.CarType?.CarTypeName?.Name ?? "Невідомий",
+            SeatNumber      = t.Seat?.SeatNumber                ?? 0,
             Price           = t.Price
         }).ToList();
     }
 
     public async Task<List<RouteStationDisplayInfo>> GetRouteStationsAsync(
         int tripId,
-        int fromStationId,
-        int toStationId,
         CancellationToken ct = default)
     {
         await using var db = new RailwayContext();
@@ -442,17 +427,67 @@ public class TicketService
             .OrderBy(rs => rs.StopOrder)
             .ToListAsync(ct);
 
-        return routeStations.Select(rs => new RouteStationDisplayInfo
+        var result = new List<RouteStationDisplayInfo>();
+        var prevDayOffset = 0;
+
+        for (var i = 0; i < routeStations.Count; i++)
         {
-            StopOrder      = rs.StopOrder,
-            StationName    = rs.Station?.Name ?? "Невідома",
-            StationInfo    = $"{rs.Station?.City ?? ""} ({rs.Station?.Country ?? ""})",
-            ArrivalTime    = rs.ArrivalTime.ToString(),
-            DepartureTime  = rs.DepartureTime.ToString(),
-            DayOffset      = rs.DayOffset,
-            IsFromStation  = rs.StationId == fromStationId,
-            IsToStation    = rs.StationId == toStationId
-        }).ToList();
+            var rs = routeStations[i];
+            var isLast = i == routeStations.Count - 1;
+
+            result.Add(new RouteStationDisplayInfo
+            {
+                StationName        = rs.Station?.Name ?? "Невідома",
+                ArrivalTime        = (rs.ArrivalTime ?? TimeOnly.MinValue).ToString(),
+                DepartureTime      = (rs.DepartureTime ?? TimeOnly.MinValue).ToString(),
+                ArrivalDayOffset   = i > 0 ? prevDayOffset : 0,
+                DepartureDayOffset = !isLast ? rs.DayOffset : 0
+            });
+
+            prevDayOffset = rs.DayOffset;
+        }
+
+        return result;
     }
-    
+
+    private static async Task<float> GetSegmentDistanceAsync(
+        RailwayContext db,
+        List<RouteStation> routeStations,
+        int fromOrder,
+        int toOrder,
+        CancellationToken ct = default)
+    {
+        var stationIds = routeStations.Select(rs => rs.StationId).Distinct().ToList();
+
+        if (stationIds.Count < 2)
+            return 0f;
+
+        var segments = await db.Segments
+            .AsNoTracking()
+            .Where(s => stationIds.Contains(s.FromStationId) && stationIds.Contains(s.ToStationId))
+            .ToListAsync(ct);
+
+        var segmentMap = new Dictionary<(int, int), float>();
+        foreach (var seg in segments)
+        {
+            segmentMap[(seg.FromStationId, seg.ToStationId)] = seg.Distance;
+            segmentMap[(seg.ToStationId, seg.FromStationId)] = seg.Distance;
+        }
+
+        var ordered = routeStations.OrderBy(rs => rs.StopOrder).ToList();
+        var total = 0f;
+
+        for (var i = 0; i < ordered.Count - 1; i++)
+        {
+            var curr = ordered[i];
+            var next = ordered[i + 1];
+            if (curr.StopOrder >= fromOrder && next.StopOrder <= toOrder)
+            {
+                if (segmentMap.TryGetValue((curr.StationId, next.StationId), out var d))
+                    total += d;
+            }
+        }
+
+        return total;
+    }
 }

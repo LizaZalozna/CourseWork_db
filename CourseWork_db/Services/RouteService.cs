@@ -43,36 +43,6 @@ public class RouteService
         return (true, "", route.Id);
     }
 
-    public async Task<(bool Ok, string Error)> UpdateAsync(
-        int id,
-        string name,
-        CancellationToken ct = default)
-    {
-        name = (name ?? "").Trim();
-
-        if (string.IsNullOrWhiteSpace(name))
-            return (false, "Введіть назву маршруту");
-
-        await using var db = new RailwayContext();
-
-        var entity = await db.Routes
-            .FirstOrDefaultAsync(x => x.Id == id, ct);
-
-        if (entity == null)
-            return (false, "Маршрут не знайдено");
-
-        var duplicate = await db.Routes.AnyAsync(
-            r => r.Name == name && r.Id != id, ct);
-
-        if (duplicate)
-            return (false, "Такий маршрут вже існує");
-
-        entity.Name = name;
-        await db.SaveChangesAsync(ct);
-
-        return (true, "");
-    }
-
     public async Task<(bool Ok, string Error)> UpdateRouteFullAsync(
         int id,
         string name,
@@ -105,11 +75,8 @@ public class RouteService
 
         var oldStations = await db.RouteStations
             .Where(s => s.RouteId == id).ToListAsync(ct);
-        var oldSegments = await db.RouteSegments
-            .Where(s => s.RouteId == id).ToListAsync(ct);
 
         db.RouteStations.RemoveRange(oldStations);
-        db.RouteSegments.RemoveRange(oldSegments);
 
         foreach (var (stationId, stopOrder, dayOffset, arrivalTime, departureTime, _) in stations)
         {
@@ -129,13 +96,7 @@ public class RouteService
             var dist = stations[i].Distance;
             if (dist > 0)
             {
-                db.RouteSegments.Add(new RouteSegment
-                {
-                    RouteId = id,
-                    FromStationId = stations[i].StationId,
-                    ToStationId = stations[i + 1].StationId,
-                    Distance = dist
-                });
+                await EnsureSegmentInternalAsync(db, stations[i].StationId, stations[i + 1].StationId, dist, ct);
             }
         }
 
@@ -165,14 +126,10 @@ public class RouteService
         var routeStations = await db.RouteStations
             .Where(s => s.RouteId == id).ToListAsync(ct);
 
-        var routeSegments = await db.RouteSegments
-            .Where(s => s.RouteId == id).ToListAsync(ct);
-
         var trips = await db.Trips
             .Where(t => t.RouteId == id).ToListAsync(ct);
 
         db.RouteStations.RemoveRange(routeStations);
-        db.RouteSegments.RemoveRange(routeSegments);
         db.Trips.RemoveRange(trips);
         db.Routes.Remove(entity);
 
@@ -185,17 +142,6 @@ public class RouteService
         {
             return (false, "Не можна видалити маршрут: є пов'язані записи");
         }
-    }
-
-    public async Task<List<RouteStation>> GetAllStationsAsync(CancellationToken ct = default)
-    {
-        await using var db = new RailwayContext();
-        return await db.RouteStations
-            .AsNoTracking()
-            .Include(s => s.Route)
-            .Include(s => s.Station)
-            .OrderBy(s => s.Id)
-            .ToListAsync(ct);
     }
 
     public async Task<List<RouteStation>> GetStationsForRouteAsync(
@@ -251,73 +197,108 @@ public class RouteService
         return (true, "");
     }
 
-    public async Task<List<RouteSegment>> GetAllSegmentsAsync(CancellationToken ct = default)
+    public async Task<Segment?> GetSegmentAsync(
+        int fromStationId,
+        int toStationId,
+        CancellationToken ct = default)
     {
+        var (a, b) = fromStationId < toStationId
+            ? (fromStationId, toStationId) : (toStationId, fromStationId);
+
         await using var db = new RailwayContext();
-        return await db.RouteSegments
+        return await db.Segments
             .AsNoTracking()
-            .Include(s => s.Route)
-            .Include(s => s.FromStation)
-            .Include(s => s.ToStation)
-            .OrderBy(s => s.Id)
-            .ToListAsync(ct);
+            .FirstOrDefaultAsync(s =>
+                s.FromStationId == a && s.ToStationId == b, ct);
     }
 
-    public async Task<List<RouteSegment>> GetSegmentsForRouteAsync(
+    public async Task<Dictionary<(int FromId, int ToId), float>> GetSegmentsForRouteAsync(
         int routeId,
         CancellationToken ct = default)
     {
         await using var db = new RailwayContext();
-        return await db.RouteSegments
+
+        var stations = await db.RouteStations
             .AsNoTracking()
-            .Include(s => s.FromStation)
-            .Include(s => s.ToStation)
             .Where(s => s.RouteId == routeId)
+            .OrderBy(s => s.StopOrder)
             .ToListAsync(ct);
+
+        var stationIds = stations.Select(s => s.StationId).Distinct().ToList();
+
+        if (stationIds.Count < 2)
+            return new Dictionary<(int, int), float>();
+
+        var segments = await db.Segments
+            .AsNoTracking()
+            .Where(s => stationIds.Contains(s.FromStationId) && stationIds.Contains(s.ToStationId))
+            .ToListAsync(ct);
+
+        var result = new Dictionary<(int, int), float>();
+        foreach (var seg in segments)
+        {
+            result[(seg.FromStationId, seg.ToStationId)] = seg.Distance;
+            result[(seg.ToStationId, seg.FromStationId)] = seg.Distance;
+        }
+
+        return result;
     }
 
-    public async Task<(bool Ok, string Error)> AddSegmentAsync(
-        int routeId,
+    public async Task<(bool Ok, string Error)> EnsureSegmentAsync(
         int fromStationId,
         int toStationId,
         float distance,
         CancellationToken ct = default)
     {
-        if (distance <= 0)
-            return (false, "Дистанція має бути > 0");
-
         if (fromStationId == toStationId)
             return (false, "Станції не можуть бути однаковими");
 
+        var (a, b) = fromStationId < toStationId
+            ? (fromStationId, toStationId) : (toStationId, fromStationId);
+
         await using var db = new RailwayContext();
 
-        if (!await db.Routes.AnyAsync(r => r.Id == routeId, ct))
-            return (false, "Оберіть існуючий маршрут");
+        var existing = await db.Segments
+            .FirstOrDefaultAsync(s => s.FromStationId == a && s.ToStationId == b, ct);
 
-        if (!await db.Stations.AnyAsync(s => s.Id == fromStationId, ct))
-            return (false, "Оберіть станцію відправлення");
+        if (existing != null)
+            return (true, "");
 
-        if (!await db.Stations.AnyAsync(s => s.Id == toStationId, ct))
-            return (false, "Оберіть станцію прибуття");
+        if (distance <= 0)
+            return (false, "Дистанція має бути > 0");
 
-        var duplicate = await db.RouteSegments.AnyAsync(
-            s => s.RouteId      == routeId      &&
-                 s.FromStationId == fromStationId &&
-                 s.ToStationId   == toStationId,
-            ct);
-
-        if (duplicate)
-            return (false, "Такий сегмент вже існує");
-
-        db.RouteSegments.Add(new RouteSegment
+        db.Segments.Add(new Segment
         {
-            RouteId        = routeId,
-            FromStationId  = fromStationId,
-            ToStationId    = toStationId,
-            Distance       = distance
+            FromStationId = a,
+            ToStationId   = b,
+            Distance      = distance
         });
 
         await db.SaveChangesAsync(ct);
         return (true, "");
+    }
+
+    private static async Task EnsureSegmentInternalAsync(
+        RailwayContext db,
+        int fromStationId,
+        int toStationId,
+        float distance,
+        CancellationToken ct = default)
+    {
+        var (a, b) = fromStationId < toStationId
+            ? (fromStationId, toStationId) : (toStationId, fromStationId);
+
+        var existing = await db.Segments
+            .FirstOrDefaultAsync(s => s.FromStationId == a && s.ToStationId == b, ct);
+
+        if (existing == null && distance > 0)
+        {
+            db.Segments.Add(new Segment
+            {
+                FromStationId = a,
+                ToStationId   = b,
+                Distance      = distance
+            });
+        }
     }
 }
