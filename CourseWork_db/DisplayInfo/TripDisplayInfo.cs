@@ -8,11 +8,8 @@ public class TripDisplayInfo
     public string   RouteName       { get; set; } = "";
     public string   TrainName       { get; set; } = "";
     public DateOnly DepartureDate   { get; set; }
-    public DateOnly ArrivalDate     { get; set; }
     public string   FromStationName { get; set; } = "";
     public string   ToStationName   { get; set; } = "";
-    public int      FromStopOrder   { get; set; }
-    public int      ToStopOrder     { get; set; }
     public int      FromStationId   { get; set; }
     public int      ToStationId     { get; set; }
 

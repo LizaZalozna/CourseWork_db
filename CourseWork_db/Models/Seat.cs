@@ -15,7 +15,5 @@ public partial class Seat
 
     public virtual ICollection<SeatCharacteristicMap> SeatCharacteristicMaps { get; set; } = new List<SeatCharacteristicMap>();
 
-    public virtual ICollection<SeatPriorityPerTrip> SeatPriorityPerTrips { get; set; } = new List<SeatPriorityPerTrip>();
-
     public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }

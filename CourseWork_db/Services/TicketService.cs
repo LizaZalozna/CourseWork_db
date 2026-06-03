@@ -12,7 +12,6 @@ namespace CourseWork_db.Services;
 public class TicketService
 {
     private readonly PricingService _pricing = new();
-    private readonly SeatPriorityService _priorities = new();
 
     public async Task<List<Station>> GetStationsAsync(CancellationToken ct = default)
     {
@@ -156,12 +155,6 @@ public class TicketService
             .Select(t => new { t.SeatId, t.FromStationId, t.ToStationId })
             .ToListAsync(ct);
 
-        var priorities = await db.SeatPriorityPerTrips
-            .AsNoTracking()
-            .Include(sp => sp.SeatPriority)
-            .Where(sp => sp.TripId == tripId)
-            .ToListAsync(ct);
-
         var carTypeIds = cars.Select(c => c.CarTypeId).Distinct().ToList();
         var allowedChars = await db.CarTypeAllowedCharacteristics
             .AsNoTracking()
@@ -172,7 +165,12 @@ public class TicketService
 
         var allowedByCarType = allowedChars
             .GroupBy(ac => ac.CarTypeId)
-            .ToDictionary(g => g.Key, g => g.Select(ac => ac.SeatCharacteristic).ToHashSet());
+            .ToDictionary(g => g.Key, g => g.Select(ac => ac.SeatCharacteristicId).ToHashSet());
+
+        var allPriorityDefs = await db.SeatPriorities.ToListAsync(ct);
+        var lowPId  = allPriorityDefs.First(p => p.Name == "Низький").Id;
+        var midPId  = allPriorityDefs.First(p => p.Name == "Середній").Id;
+        var highPId = allPriorityDefs.First(p => p.Name == "Високий").Id;
 
         var result = new List<SeatDisplayInfo>();
 
@@ -195,9 +193,26 @@ public class TicketService
             var pricePerKm   = carType?.PricePerKm ?? 0f;
             var servicePrice = carType?.ServicePrice ?? 0f;
 
-            var priorityName = priorities
-                .FirstOrDefault(sp => sp.SeatId == seat.Id)
-                ?.SeatPriority?.Name ?? "Низький";
+            var seatSegments = seatTickets
+                .Select(t => new SeatPriorityService.Segment(
+                    routeStations.FindIndex(rs => rs.StationId == t.FromStationId),
+                    routeStations.FindIndex(rs => rs.StationId == t.ToStationId)
+                ))
+                .ToList();
+
+            var realTicketCount = seatTickets.Count;
+
+            seatSegments.Add(new SeatPriorityService.Segment(fromOrder, toOrder));
+
+            int hypPriorityId;
+            if (realTicketCount == 0)
+                hypPriorityId = SeatPriorityService.WouldCompleteTo100(seatSegments, routeStations.Count)
+                    ? highPId : lowPId;
+            else
+                hypPriorityId = SeatPriorityService.ComputePriorityId(
+                    seatSegments, routeStations.Count, lowPId, midPId, highPId);
+
+            var priorityName = allPriorityDefs.First(p => p.Id == hypPriorityId).Name;
 
             var chars = seat.SeatCharacteristicMaps?
                 .Select(scm => scm.SeatCharacteristic)
@@ -206,7 +221,7 @@ public class TicketService
                 {
                     if (carType?.Id == null) return true;
                     return allowedByCarType.TryGetValue(carType.Id, out var allowed)
-                        && allowed.Contains(sc);
+                        && allowed.Contains(sc.Id);
                 })
                 .Select(sc => $"{sc.CharacteristicType.Name}: {sc.Value}")
                 .ToList() ?? new();
@@ -277,12 +292,37 @@ public class TicketService
         var pricePerKm   = carType?.PricePerKm ?? 0f;
         var servicePrice = carType?.ServicePrice ?? 0f;
 
-        var priorityName = await db.SeatPriorityPerTrips
+        var allPriorityDefs = await db.SeatPriorities.ToListAsync(ct);
+        var lowPId  = allPriorityDefs.First(p => p.Name == "Низький").Id;
+        var midPId  = allPriorityDefs.First(p => p.Name == "Середній").Id;
+        var highPId = allPriorityDefs.First(p => p.Name == "Високий").Id;
+
+        var existingTickets = await db.Tickets
             .AsNoTracking()
-            .Include(sp => sp.SeatPriority)
-            .Where(sp => sp.TripId == tripId && sp.SeatId == seatId)
-            .Select(sp => sp.SeatPriority!.Name)
-            .FirstOrDefaultAsync(ct) ?? "Низький";
+            .Where(t => t.TripId == tripId && t.SeatId == seatId)
+            .Select(t => new { t.FromStationId, t.ToStationId })
+            .ToListAsync(ct);
+
+        var seatSegments = existingTickets
+            .Select(t => new SeatPriorityService.Segment(
+                routeStations.FindIndex(rs => rs.StationId == t.FromStationId),
+                routeStations.FindIndex(rs => rs.StationId == t.ToStationId)
+            ))
+            .ToList();
+
+        var realTicketCount = existingTickets.Count;
+
+        seatSegments.Add(new SeatPriorityService.Segment(fromOrder, toOrder));
+
+        int hypPriorityId;
+        if (realTicketCount == 0)
+            hypPriorityId = SeatPriorityService.WouldCompleteTo100(seatSegments, routeStations.Count)
+                ? highPId : lowPId;
+        else
+            hypPriorityId = SeatPriorityService.ComputePriorityId(
+                seatSegments, routeStations.Count, lowPId, midPId, highPId);
+
+        var priorityName = allPriorityDefs.First(p => p.Id == hypPriorityId).Name;
 
         var (finalPrice, priceInfo) = _pricing.Calculate(
             segmentDistance, pricePerKm, servicePrice,
@@ -358,7 +398,6 @@ public class TicketService
         try
         {
             await db.SaveChangesAsync(ct);
-            await _priorities.AssignPrioritiesAsync(tripId, ct);
             return (true, "");
         }
         catch (DbUpdateException ex)
@@ -387,23 +426,44 @@ public class TicketService
             .Include(t => t.ToStation)
             .Include(t => t.Seat).ThenInclude(s => s!.Car).ThenInclude(c => c!.CarType).ThenInclude(ct => ct!.CarTypeName)
             .Where(t => t.UserId == userId)
-            .OrderByDescending(t => t.Id)
+            .OrderBy(t => t.Seat!.Car!.CarNumber)
+            .ThenBy(t => t.Seat!.SeatNumber)
             .ToListAsync(ct);
 
-        return tickets.Select(t => new TicketDisplayInfo
+        var seatIds = tickets.Select(t => t.SeatId).Distinct().ToList();
+        var charMaps = await db.SeatCharacteristicMaps
+            .AsNoTracking()
+            .Include(scm => scm.SeatCharacteristic).ThenInclude(sc => sc.CharacteristicType)
+            .Where(scm => seatIds.Contains(scm.SeatId))
+            .ToListAsync(ct);
+        var charBySeat = charMaps.GroupBy(scm => scm.SeatId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        return tickets.Select(t =>
         {
-            TicketId        = t.Id,
-            TripId          = t.TripId,
-            RouteName       = t.Trip?.Route?.Name               ?? "Невідомий",
-            TrainName       = t.Trip?.Train?.Name               ?? "Невідомий",
-            FromStationName = t.FromStation?.Name               ?? "Невідома",
-            ToStationName   = t.ToStation?.Name                 ?? "Невідома",
-            FromStationId   = t.FromStationId,
-            ToStationId     = t.ToStationId,
-            DepartureDate   = t.Trip?.DepartureDate             ?? DateOnly.MinValue,
-            CarTypeName     = t.Seat?.Car?.CarType?.CarTypeName?.Name ?? "Невідомий",
-            SeatNumber      = t.Seat?.SeatNumber                ?? 0,
-            Price           = t.Price
+            var maps = charBySeat.GetValueOrDefault(t.SeatId);
+            var chars = maps?
+                .Select(scm => scm.SeatCharacteristic)
+                .Where(sc => sc?.CharacteristicType != null)
+                .Select(sc => $"{sc.CharacteristicType.Name}: {sc.Value}")
+                .ToList() ?? new();
+
+            return new TicketDisplayInfo
+            {
+                TicketId        = t.Id,
+                TripId          = t.TripId,
+                RouteName       = t.Trip?.Route?.Name               ?? "Невідомий",
+                TrainName       = t.Trip?.Train?.Name               ?? "Невідомий",
+                FromStationName = t.FromStation?.Name               ?? "Невідома",
+                ToStationName   = t.ToStation?.Name                 ?? "Невідома",
+                FromStationId   = t.FromStationId,
+                ToStationId     = t.ToStationId,
+                DepartureDate   = t.Trip?.DepartureDate             ?? DateOnly.MinValue,
+                CarTypeName     = t.Seat?.Car?.CarType?.CarTypeName?.Name ?? "Невідомий",
+                SeatNumber      = t.Seat?.SeatNumber                ?? 0,
+                Price           = t.Price,
+                Characteristics = string.Join(", ", chars)
+            };
         }).ToList();
     }
 

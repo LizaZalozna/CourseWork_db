@@ -39,8 +39,6 @@ public partial class RailwayContext : DbContext
 
     public virtual DbSet<SeatPriority> SeatPriorities { get; set; }
 
-    public virtual DbSet<SeatPriorityPerTrip> SeatPriorityPerTrips { get; set; }
-
     public virtual DbSet<Segment> Segments { get; set; }
 
     public virtual DbSet<Station> Stations { get; set; }
@@ -312,37 +310,6 @@ public partial class RailwayContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(20)
                 .HasColumnName("name");
-        });
-
-        modelBuilder.Entity<SeatPriorityPerTrip>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("seat_priority_per_trip_pkey");
-
-            entity.ToTable("seat_priority_per_trip");
-
-            entity.HasIndex(e => new { e.SeatId, e.TripId }, "seat_priority_per_trip_seat_id_trip_id_key").IsUnique();
-
-            entity.Property(e => e.Id)
-                .UseIdentityAlwaysColumn()
-                .HasColumnName("id");
-            entity.Property(e => e.SeatId).HasColumnName("seat_id");
-            entity.Property(e => e.SeatPriorityId).HasColumnName("seat_priority_id");
-            entity.Property(e => e.TripId).HasColumnName("trip_id");
-
-            entity.HasOne(d => d.Seat).WithMany(p => p.SeatPriorityPerTrips)
-                .HasForeignKey(d => d.SeatId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("seat_priority_per_trip_seat_id_fkey");
-
-            entity.HasOne(d => d.SeatPriority).WithMany(p => p.SeatPriorityPerTrips)
-                .HasForeignKey(d => d.SeatPriorityId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("seat_priority_per_trip_seat_priority_id_fkey");
-
-            entity.HasOne(d => d.Trip).WithMany(p => p.SeatPriorityPerTrips)
-                .HasForeignKey(d => d.TripId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("seat_priority_per_trip_trip_id_fkey");
         });
 
         modelBuilder.Entity<Segment>(entity =>

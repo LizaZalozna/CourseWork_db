@@ -75,105 +75,55 @@ public class SeatPriorityService
             return (false, "Не можна видалити: є пов'язані записи");
         }
     }
-    
-    private record Segment(int FromIndex, int ToIndex);
 
-    public async Task AssignPrioritiesAsync(int tripId, CancellationToken ct = default)
+    public record Segment(int FromIndex, int ToIndex);
+
+    public static int ComputePriorityId(
+        List<Segment> seatTickets, int stationCount,
+        int lowPId, int midPId, int highPId)
     {
-        await using var db = new RailwayContext();
+        if (seatTickets.Count == 0)
+            return lowPId;
 
-        var tickets = await db.Tickets
-            .Where(t => t.TripId == tripId)
-            .Select(t => new
-            {
-                t.SeatId,
-                t.FromStationId,
-                t.ToStationId
-            })
-            .ToListAsync(ct);
+        bool completes100 = CoversFullRoute(seatTickets, stationCount)
+                         || CanCompleteWithOneGap(seatTickets, stationCount);
 
-        var seats = await db.Seats
-            .Where(s => s.Car.Train.Trips.Any(t => t.Id == tripId))
-            .ToListAsync(ct);
+        int occupiedSegments = CountOccupiedSegments(seatTickets);
+        int totalSegments = stationCount - 1;
+        bool thresholdReached = totalSegments > 0 && occupiedSegments * 100 / totalSegments >= 70;
 
-        var priorities = await db.SeatPriorities.ToListAsync(ct);
-        var noPriority   = priorities.First(p => p.Name == "Низький");
-        var midPriority  = priorities.First(p => p.Name == "Середній");
-        var highPriority = priorities.First(p => p.Name == "Високий");
+        if (completes100 || thresholdReached)
+            return highPId;
 
-        var routeStations = await db.RouteStations
-            .Where(rs => rs.Route.Trips.Any(t => t.Id == tripId))
-            .OrderBy(rs => rs.StopOrder)
-            .Select(rs => rs.StationId)
-            .ToListAsync(ct);
-
-        foreach (var seat in seats)
-        {
-            var seatTickets = tickets
-                .Where(t => t.SeatId == seat.Id)
-                .Select(t => new Segment(
-                    routeStations.IndexOf(t.FromStationId),
-                    routeStations.IndexOf(t.ToStationId)
-                ))
-                .OrderBy(t => t.FromIndex)
-                .ToList();
-
-            int priorityId = noPriority.Id;
-
-            if (seatTickets.Any())
-            {
-                bool covers100   = CoversFullRoute(seatTickets, routeStations.Count);
-                bool canComplete = CanCompleteRoute(seatTickets, routeStations.Count);
-
-                if (covers100 || canComplete)
-                    priorityId = highPriority.Id;
-                else
-                    priorityId = midPriority.Id;
-            }
-
-            var existing = await db.SeatPriorityPerTrips
-                .FirstOrDefaultAsync(x => x.SeatId == seat.Id && x.TripId == tripId, ct);
-
-            if (existing == null)
-            {
-                db.SeatPriorityPerTrips.Add(new SeatPriorityPerTrip
-                {
-                    SeatId         = seat.Id,
-                    TripId         = tripId,
-                    SeatPriorityId = priorityId
-                });
-            }
-            else
-            {
-                existing.SeatPriorityId = priorityId;
-            }
-        }
-
-        await db.SaveChangesAsync(ct);
+        return midPId;
     }
 
-    private bool CoversFullRoute(List<Segment> tickets, int stationCount)
-    {
-        var segments = tickets
-            .OrderBy(t => t.FromIndex)
-            .ToList();
+    public static bool WouldCompleteTo100(List<Segment> segments, int stationCount) =>
+        CoversFullRoute(segments, stationCount) || CanCompleteWithOneGap(segments, stationCount);
 
+    private static int CountOccupiedSegments(List<Segment> tickets)
+    {
+        var covered = new HashSet<int>();
+        foreach (var t in tickets)
+            for (var i = t.FromIndex; i < t.ToIndex; i++)
+                covered.Add(i);
+        return covered.Count;
+    }
+
+    private static bool CoversFullRoute(List<Segment> tickets, int stationCount)
+    {
         int covered = 0;
-        foreach (var seg in segments)
+        foreach (var seg in tickets.OrderBy(t => t.FromIndex))
         {
             if (seg.FromIndex > covered) break;
             covered = Math.Max(covered, seg.ToIndex);
         }
-
         return covered >= stationCount - 1;
     }
 
-    private bool CanCompleteRoute(List<Segment> tickets, int stationCount)
+    private static bool CanCompleteWithOneGap(List<Segment> tickets, int stationCount)
     {
-        var segments = tickets
-            .OrderBy(t => t.FromIndex)
-            .ToList();
-
+        var segments = tickets.OrderBy(t => t.FromIndex).ToList();
         var gaps = new List<(int From, int To)>();
         int prev = 0;
 
