@@ -1,0 +1,186 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="CourseWork_db.Views.HomeView">
+
+  <DockPanel Margin="16">
+    <TabControl x:Name="Tabs" Margin="0">
+
+      <TabItem Header="Купити квиток">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <Grid ColumnDefinitions="*,16,*"
+                MaxWidth="1100"
+                Margin="0,12,0,80">
+
+            <Border Grid.Column="0" Classes="card">
+              <StackPanel Spacing="14">
+
+                <TextBlock Text="Пошук рейсу"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Звідки" Classes="label"/>
+                  <AutoCompleteBox x:Name="FromStationCombo" Watermark="Оберіть станцію відправлення" FilterMode="Contains"/>
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Куди" Classes="label"/>
+                  <AutoCompleteBox x:Name="ToStationCombo" Watermark="Оберіть станцію прибуття" FilterMode="Contains"/>
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Дата поїздки" Classes="label"/>
+                  <DatePicker x:Name="TripDatePicker"/>
+                </StackPanel>
+
+                <Button Content="🔍 Знайти рейси"
+                        Classes="primary"
+                        HorizontalAlignment="Stretch"
+                        Click="OnSearchTripsClick"/>
+
+                <TextBlock x:Name="TripSearchStatus"
+                           Classes="muted"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           FontSize="13"/>
+
+                <StackPanel Spacing="6">
+                  <TextBlock Text="Знайдені рейси"
+                             Classes="label"
+                             Margin="0,4,0,0"/>
+                  <ListBox x:Name="TripsList"
+                           MinHeight="150"
+                           SelectionChanged="OnTripSelected"/>
+                </StackPanel>
+
+              </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Classes="card">
+              <StackPanel Spacing="14">
+
+                <Border Classes="card-info">
+                  <Grid ColumnDefinitions="*,12,Auto" VerticalAlignment="Center">
+                    <TextBlock Grid.Column="0"
+                               x:Name="SelectedPriceText"
+                               Classes="price"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               Text="Оберіть місця"/>
+                    <Button Grid.Column="2"
+                            x:Name="BuyTicketBtn"
+                            Content="Купити квиток"
+                            Classes="success"
+                            IsEnabled="False"
+                            Click="OnBuyTicketClick"/>
+                  </Grid>
+                </Border>
+
+                <TextBlock x:Name="BuyStatus"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           FontSize="13"/>
+
+                <Border Classes="card-info" Padding="12">
+                    <StackPanel Spacing="8">
+                    <TextBlock Text="Фільтри" Classes="muted" FontSize="12"/>
+                    <AutoCompleteBox x:Name="SeatCarTypeFilter"
+                                    Watermark="Всі типи вагонів"
+                                    FilterMode="Contains"
+                                    SelectionChanged="OnSeatFilterChanged"/>
+                    <TextBox x:Name="CharFilterBox"
+                             Watermark="Характеристика (вікно, верх…)"
+                             TextChanged="OnSeatFilterChanged"/>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                      <TextBox x:Name="PriceFromBox"
+                               Watermark="Ціна від"
+                               Width="85"
+                               TextChanged="OnSeatFilterChanged"/>
+                      <TextBlock Text="—" VerticalAlignment="Center"/>
+                      <TextBox x:Name="PriceToBox"
+                               Watermark="Ціна до"
+                               Width="85"
+                               TextChanged="OnSeatFilterChanged"/>
+                      <Button Content="Скинути"
+                              Classes="secondary"
+                              FontSize="11"
+                              Padding="8,4"
+                              Click="OnResetFiltersClick"/>
+                    </StackPanel>
+                  </StackPanel>
+                </Border>
+
+                <TextBlock Text="Вільні місця"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+
+                <ListBox x:Name="SeatsList"
+                         MinHeight="150"
+                         SelectionMode="Toggle"
+                         SelectionChanged="OnSeatSelected"/>
+
+              </StackPanel>
+            </Border>
+
+          </Grid>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="Мої квитки">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="14"
+                      MaxWidth="800"
+                      Margin="0,12,0,80">
+
+            <Border Classes="card">
+              <StackPanel Spacing="14">
+
+                <TextBlock Text="Ваші квитки"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+
+                <ListBox x:Name="MyTicketsList"
+                         MinHeight="200"
+                         SelectionChanged="OnMyTicketSelected"/>
+
+                <Grid ColumnDefinitions="*,12,Auto">
+                  <TextBlock Grid.Column="0"
+                             x:Name="MyTicketsStatus"
+                             Classes="muted"
+                             VerticalAlignment="Center"/>
+                  <Button Grid.Column="2"
+                          Content="Оновити"
+                          Classes="secondary"
+                          Click="OnRefreshTicketsClick"/>
+                </Grid>
+
+              </StackPanel>
+            </Border>
+
+            <Border x:Name="RouteInfoPanel"
+                    Classes="card"
+                    IsVisible="False">
+              <StackPanel Spacing="10">
+                <TextBlock Text="Маршрут поїздки"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+                <TextBlock x:Name="RouteInfoHeader"
+                           Classes="muted"
+                           TextAlignment="Center"/>
+                <TextBlock x:Name="RouteStationsStatus"
+                           Classes="muted"
+                           TextAlignment="Center"
+                           IsVisible="False"/>
+                <ListBox x:Name="RouteStationsList"
+                         MinHeight="150"/>
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+    </TabControl>
+  </DockPanel>
+
+</UserControl>

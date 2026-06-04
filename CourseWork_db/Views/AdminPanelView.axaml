@@ -4,7 +4,7 @@
 
   <DockPanel Margin="16">
     <TabControl x:Name="Tabs">
-      
+
       <TabItem Header="Станції">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel Spacing="12"
@@ -16,14 +16,14 @@
                 <TextBlock Text="Станція"
                            Classes="heading"
                            HorizontalAlignment="Center"/>
-                
+
                 <StackPanel Spacing="4">
                   <TextBlock Text="Існуюча станція" Classes="label"/>
                   <AutoCompleteBox x:Name="ExistingStationBox" Watermark="Оберіть для редагування…" FilterMode="Contains"/>
                 </StackPanel>
 
                 <Separator/>
-                
+
                 <StackPanel Spacing="4">
                   <TextBlock Text="Назва" Classes="label"/>
                   <TextBox x:Name="StationNameBox" Watermark="Назва станції"/>
@@ -36,7 +36,7 @@
                   <TextBlock Text="Країна" Classes="label"/>
                   <TextBox x:Name="StationCountryBox" Watermark="Країна"/>
                 </StackPanel>
-                
+
                 <StackPanel Orientation="Horizontal"
                             Spacing="20"
                             HorizontalAlignment="Center">
@@ -59,13 +59,13 @@
           </StackPanel>
         </ScrollViewer>
       </TabItem>
-      
+
       <TabItem Header="Маршрути">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel Spacing="12"
                       MaxWidth="560"
                       Margin="0,12,0,80">
-            
+
             <Border Classes="card">
               <StackPanel Spacing="12">
                 <TextBlock Text="Новий маршрут"
@@ -83,13 +83,13 @@
                 </Grid>
               </StackPanel>
             </Border>
-            
+
             <Border Classes="card">
               <StackPanel Spacing="12">
                 <TextBlock Text="Зупинки маршруту"
                            Classes="heading"
                            HorizontalAlignment="Center"/>
-                
+
                 <Grid ColumnDefinitions="*,8,*,8,Auto,8,Auto">
                   <Button Grid.Column="0" x:Name="AddStationCardBtn"
                           Content="+ Станція" Classes="secondary"/>
@@ -100,9 +100,9 @@
                   <Button Grid.Column="6" x:Name="MoveDownBtn"
                           Content="↓" Classes="secondary" Width="48"/>
                 </Grid>
-                
+
                 <StackPanel x:Name="RouteStationsCardsPanel" Spacing="6"/>
-                
+
                 <Border Classes="card-info" Padding="12,10">
                   <StackPanel Orientation="Horizontal" Spacing="24" HorizontalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="6">
@@ -127,7 +127,7 @@
                            FontSize="13"/>
               </StackPanel>
             </Border>
-            
+
             <Border Classes="card">
               <StackPanel Spacing="12">
                 <TextBlock Text="Існуючі маршрути"
@@ -190,7 +190,7 @@
                           Content="Додати" Classes="primary" Width="120"/>
                   <Button x:Name="UpdateTrainButton"
                           Content="Оновити" Classes="secondary" Width="120"/>
-                  <Button  x:Name="DeleteTrainButton"
+                  <Button x:Name="DeleteTrainButton"
                           Content="Видалити" Classes="danger" Width="120"/>
                 </StackPanel>
 
@@ -205,16 +205,90 @@
           </StackPanel>
         </ScrollViewer>
       </TabItem>
-      
-      <TabItem Header="Вагони">
+
+      <TabItem Header="Типи вагонів">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel Spacing="12"
                       MaxWidth="560"
                       Margin="0,12,0,80">
-            
+
             <Border Classes="card">
               <StackPanel Spacing="12">
-                <TextBlock Text="Тип вагона"
+                <TextBlock Text="Назва типу вагона"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Існуюча назва" Classes="label"/>
+                  <AutoCompleteBox x:Name="ExistingCarTypeNameBox" Watermark="Оберіть для редагування…" FilterMode="Contains"/>
+                </StackPanel>
+
+                <Separator/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Назва" Classes="label"/>
+                  <TextBox x:Name="CarTypeNameValueBox" Watermark="Наприклад: Купе, Плацкарт"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            Spacing="20"
+                            HorizontalAlignment="Center">
+                  <Button x:Name="AddCarTypeNameButton"
+                          Content="Додати" Classes="primary" Width="120"/>
+                  <Button x:Name="UpdateCarTypeNameButton"
+                          Content="Оновити" Classes="secondary" Width="120"/>
+                  <Button x:Name="DeleteCarTypeNameButton"
+                          Content="Видалити" Classes="danger" Width="120"/>
+                </StackPanel>
+
+                <TextBlock x:Name="CarTypeNameMsg"
+                           TextWrapping="Wrap"
+                           IsVisible="False"
+                           TextAlignment="Center"
+                           FontSize="13"/>
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Етап модернізації"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Існуючий етап" Classes="label"/>
+                  <AutoCompleteBox x:Name="ExistingStageBox" Watermark="Оберіть для редагування…" FilterMode="Contains"/>
+                </StackPanel>
+
+                <Separator/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Назва" Classes="label"/>
+                  <TextBox x:Name="StageNameBox" Watermark="Наприклад: Базовий, Покращений"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            Spacing="20"
+                            HorizontalAlignment="Center">
+                  <Button x:Name="AddStageButton"
+                          Content="Додати" Classes="primary" Width="120"/>
+                  <Button x:Name="UpdateStageButton"
+                          Content="Оновити" Classes="secondary" Width="120"/>
+                  <Button x:Name="DeleteStageButton"
+                          Content="Видалити" Classes="danger" Width="120"/>
+                </StackPanel>
+
+                <TextBlock x:Name="StageMsg"
+                           TextWrapping="Wrap"
+                           IsVisible="False"
+                           TextAlignment="Center"
+                           FontSize="13"/>
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Тип вагона (комбінація)"
                            Classes="heading"
                            HorizontalAlignment="Center"/>
 
@@ -227,7 +301,19 @@
 
                 <StackPanel Spacing="4">
                   <TextBlock Text="Назва типу" Classes="label"/>
-                  <TextBox x:Name="CarTypeNameBox" Watermark="Наприклад: Купе, Плацкарт"/>
+                  <AutoCompleteBox x:Name="CarTypeNameBox" Watermark="Оберіть назву" FilterMode="Contains"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Етап модернізації" Classes="label"/>
+                  <AutoCompleteBox x:Name="ModernizationStageBox" Watermark="Оберіть етап" FilterMode="Contains"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Ціна за 1 км (грн)" Classes="label"/>
+                  <TextBox x:Name="CarTypePriceBox" Watermark="Наприклад: 2.50"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Вартість обслуговування (грн)" Classes="label"/>
+                  <TextBox x:Name="CarTypeServicePriceBox" Watermark="Наприклад: 50.00"/>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal"
@@ -240,9 +326,64 @@
                   <Button x:Name="DeleteCarTypeButton"
                           Content="Видалити" Classes="danger" Width="120"/>
                 </StackPanel>
+
+                <TextBlock x:Name="CarTypeMsg"
+                           TextWrapping="Wrap"
+                           IsVisible="False"
+                           TextAlignment="Center"
+                           FontSize="13"/>
               </StackPanel>
             </Border>
-            
+
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Дозволені характеристики для типу"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Існуючий зв'язок" Classes="label"/>
+                  <AutoCompleteBox x:Name="ExistingAllowedCharBox" Watermark="Оберіть для редагування…" FilterMode="Contains"/>
+                </StackPanel>
+
+                <Separator/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Тип вагона" Classes="label"/>
+                  <AutoCompleteBox x:Name="AllowedCharCarTypeBox" Watermark="Оберіть тип вагона" FilterMode="Contains"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Характеристика" Classes="label"/>
+                  <AutoCompleteBox x:Name="AllowedCharBox" Watermark="Оберіть характеристику" FilterMode="Contains"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            Spacing="20"
+                            HorizontalAlignment="Center">
+                  <Button x:Name="AddAllowedCharButton"
+                          Content="Додати" Classes="primary" Width="120"/>
+                  <Button x:Name="DeleteAllowedCharButton"
+                          Content="Видалити" Classes="danger" Width="120"/>
+                </StackPanel>
+
+                <TextBlock x:Name="AllowedCharMsg"
+                           TextWrapping="Wrap"
+                           IsVisible="False"
+                           TextAlignment="Center"
+                           FontSize="13"/>
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="Вагони">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="12"
+                      MaxWidth="560"
+                      Margin="0,12,0,80">
+
             <Border Classes="card">
               <StackPanel Spacing="12">
                 <TextBlock Text="Вагон"
@@ -274,7 +415,7 @@
                             HorizontalAlignment="Center">
                   <Button x:Name="AddCarButton"
                           Content="Додати" Classes="primary" Width="120"/>
-                  <Button  x:Name="UpdateCarButton"
+                  <Button x:Name="UpdateCarButton"
                           Content="Оновити" Classes="secondary" Width="120"/>
                   <Button x:Name="DeleteCarButton"
                           Content="Видалити" Classes="danger" Width="120"/>
@@ -291,7 +432,7 @@
           </StackPanel>
         </ScrollViewer>
       </TabItem>
-      
+
       <TabItem Header="Рейси">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel Spacing="12"
@@ -353,8 +494,8 @@
           </StackPanel>
         </ScrollViewer>
       </TabItem>
-      
-      <TabItem Header="Тарифи">
+
+      <TabItem Header="Характеристики">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel Spacing="12"
                       MaxWidth="560"
@@ -362,44 +503,130 @@
 
             <Border Classes="card">
               <StackPanel Spacing="12">
-                <TextBlock Text="Тариф"
+                <TextBlock Text="Тип характеристики місця"
                            Classes="heading"
                            HorizontalAlignment="Center"/>
 
                 <StackPanel Spacing="4">
-                  <TextBlock Text="Існуючий тариф" Classes="label"/>
-                  <AutoCompleteBox x:Name="ExistingTariffBox" Watermark="Оберіть для редагування…" FilterMode="Contains"/>
+                  <TextBlock Text="Існуючий тип" Classes="label"/>
+                  <AutoCompleteBox x:Name="ExistingCharTypeBox" Watermark="Оберіть для редагування…" FilterMode="Contains"/>
                 </StackPanel>
 
                 <Separator/>
 
                 <StackPanel Spacing="4">
-                  <TextBlock Text="Тип вагона" Classes="label"/>
-                  <AutoCompleteBox x:Name="TariffCarTypeBox" Watermark="Оберіть тип вагона" FilterMode="Contains"/>
-                </StackPanel>
-                <StackPanel Spacing="4">
-                  <TextBlock Text="Ціна за 1 км (грн)" Classes="label"/>
-                  <TextBox x:Name="TariffPriceBox" Watermark="Наприклад: 2.50"/>
+                  <TextBlock Text="Назва" Classes="label"/>
+                  <TextBox x:Name="CharTypeNameBox" Watermark="Наприклад: Біля вікна/проходу"/>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal"
                             Spacing="20"
                             HorizontalAlignment="Center">
-                  <Button x:Name="AddTariffButton"
+                  <Button x:Name="AddCharTypeButton"
                           Content="Додати" Classes="primary" Width="120"/>
-                  <Button  x:Name="UpdateTariffButton"
+                  <Button x:Name="UpdateCharTypeButton"
                           Content="Оновити" Classes="secondary" Width="120"/>
-                  <Button x:Name="DeleteTariffButton"
+                  <Button x:Name="DeleteCharTypeButton"
                           Content="Видалити" Classes="danger" Width="120"/>
                 </StackPanel>
 
-                <TextBlock x:Name="TariffMsg"
+                <TextBlock x:Name="CharTypeMsg"
                            TextWrapping="Wrap"
                            IsVisible="False"
                            TextAlignment="Center"
                            FontSize="13"/>
               </StackPanel>
             </Border>
+
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Характеристика місця"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Існуюча характеристика" Classes="label"/>
+                  <AutoCompleteBox x:Name="ExistingCharBox" Watermark="Оберіть для редагування…" FilterMode="Contains"/>
+                </StackPanel>
+
+                <Separator/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Тип" Classes="label"/>
+                  <AutoCompleteBox x:Name="CharTypeSelectorBox" Watermark="Оберіть тип" FilterMode="Contains"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Значення" Classes="label"/>
+                  <TextBox x:Name="CharValueBox" Watermark="Наприклад: Біля вікна"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            Spacing="20"
+                            HorizontalAlignment="Center">
+                  <Button x:Name="AddCharButton"
+                          Content="Додати" Classes="primary" Width="120"/>
+                  <Button x:Name="UpdateCharButton"
+                          Content="Оновити" Classes="secondary" Width="120"/>
+                  <Button x:Name="DeleteCharButton"
+                          Content="Видалити" Classes="danger" Width="120"/>
+                </StackPanel>
+
+                <TextBlock x:Name="CharMsg"
+                           TextWrapping="Wrap"
+                           IsVisible="False"
+                           TextAlignment="Center"
+                           FontSize="13"/>
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="Інше">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="12"
+                      MaxWidth="560"
+                      Margin="0,12,0,80">
+
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Пріоритет місця"
+                           Classes="heading"
+                           HorizontalAlignment="Center"/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Існуючий пріоритет" Classes="label"/>
+                  <AutoCompleteBox x:Name="ExistingPriorityBox" Watermark="Оберіть для редагування…" FilterMode="Contains"/>
+                </StackPanel>
+
+                <Separator/>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Назва" Classes="label"/>
+                  <TextBox x:Name="PriorityNameBox" Watermark="Наприклад: Високий, Середній"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            Spacing="20"
+                            HorizontalAlignment="Center">
+                  <Button x:Name="AddPriorityButton"
+                          Content="Додати" Classes="primary" Width="120"/>
+                  <Button x:Name="UpdatePriorityButton"
+                          Content="Оновити" Classes="secondary" Width="120"/>
+                  <Button x:Name="DeletePriorityButton"
+                          Content="Видалити" Classes="danger" Width="120"/>
+                </StackPanel>
+
+                <TextBlock x:Name="PriorityMsg"
+                           TextWrapping="Wrap"
+                           IsVisible="False"
+                           TextAlignment="Center"
+                           FontSize="13"/>
+              </StackPanel>
+            </Border>
+
+
 
           </StackPanel>
         </ScrollViewer>
